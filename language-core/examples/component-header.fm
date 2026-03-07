@@ -1,0 +1,8 @@
+﻿import "../styles/base.fs" as Base;
+
+component Header(title: string) {
+  <Column style=HeaderFrame>
+    <Text value=title style=Heading/>
+    <Slot/>
+  </Column>
+}

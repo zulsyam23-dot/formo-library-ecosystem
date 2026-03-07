@@ -1,0 +1,32 @@
+[workspace]
+members = [
+  "language-core/programs/formo-lexer",
+  "language-core/programs/formo-parser",
+  "language-core/programs/formo-resolver",
+  "language-core/programs/formo-typer",
+  "language-core/programs/formo-ir",
+  "language-style/programs/formo-style",
+  "runtime-web/programs/formo-backend-web",
+  "runtime-desktop/programs/formo-backend-desktop",
+  "tooling/programs/formo-cli"
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+license = "MIT"
+authors = ["Formo Team"]
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+formo-lexer = { path = "language-core/programs/formo-lexer" }
+formo-parser = { path = "language-core/programs/formo-parser" }
+formo-resolver = { path = "language-core/programs/formo-resolver" }
+formo-typer = { path = "language-core/programs/formo-typer" }
+formo-style = { path = "language-style/programs/formo-style" }
+formo-ir = { path = "language-core/programs/formo-ir" }
+formo-backend-web = { path = "runtime-web/programs/formo-backend-web" }
+formo-backend-desktop = { path = "runtime-desktop/programs/formo-backend-desktop" }
+formo-cli = { path = "tooling/programs/formo-cli" }

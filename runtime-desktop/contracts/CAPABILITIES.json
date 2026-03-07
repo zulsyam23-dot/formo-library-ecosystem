@@ -1,0 +1,24 @@
+{
+  "library": "runtime-desktop",
+  "status": "active",
+  "inputs": [
+    "public ir",
+    "compiled style map"
+  ],
+  "outputs": [
+    "index.html",
+    "app.css",
+    "app.js",
+    "desktop-bridge.js",
+    "app.ir.json"
+  ],
+  "capabilities": [
+    "desktop_bundle_emit",
+    "desktop_bridge_actions",
+    "desktop_state_bridge",
+    "ir_snapshot_emit"
+  ],
+  "maps_to_crates": [
+    "programs/formo-backend-desktop"
+  ]
+}

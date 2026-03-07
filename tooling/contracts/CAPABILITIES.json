@@ -1,0 +1,25 @@
+{
+  "library": "tooling",
+  "status": "active",
+  "inputs": [
+    "entry fm path",
+    "cli command and flags"
+  ],
+  "outputs": [
+    "diagnostic output",
+    "build artifacts",
+    "benchmark reports",
+    "lsp diagnostics payload"
+  ],
+  "capabilities": [
+    "check_diagnose_commands",
+    "build_multi_target",
+    "watch_mode",
+    "benchmark_mode",
+    "lsp_output",
+    "optional_backend_features"
+  ],
+  "maps_to_crates": [
+    "programs/formo-cli"
+  ]
+}

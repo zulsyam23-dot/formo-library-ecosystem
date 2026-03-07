@@ -1,0 +1,9 @@
+{
+  "stage": "parser",
+  "code": "E1001",
+  "file": "main.fm",
+  "line": 12,
+  "col": 5,
+  "message": "unexpected token",
+  "source": "formo"
+}

@@ -1,0 +1,73 @@
+{
+  "ecosystem": "formo",
+  "version": "1.0.0",
+  "updated_at": "2026-03-07",
+  "mandatory_features": [
+    {
+      "library": "language-core",
+      "features": [
+        "lexer_diagnostics",
+        "parser_recovery",
+        "import_resolution",
+        "type_validation",
+        "public_ir_contract"
+      ]
+    },
+    {
+      "library": "language-style",
+      "features": [
+        "style_parser",
+        "token_system",
+        "style_allowlist",
+        "unused_token_detection",
+        "style_reference_validation"
+      ]
+    },
+    {
+      "library": "runtime-web",
+      "features": [
+        "web_artifact_emit",
+        "state_action_runtime",
+        "if_for_runtime",
+        "modal_accessibility",
+        "keyed_for_patch"
+      ]
+    },
+    {
+      "library": "runtime-desktop",
+      "features": [
+        "desktop_bundle_emit",
+        "desktop_bridge_actions",
+        "desktop_state_bridge",
+        "ir_snapshot_emit"
+      ]
+    },
+    {
+      "library": "tooling",
+      "features": [
+        "check_diagnose_commands",
+        "build_multi_target",
+        "watch_mode",
+        "benchmark_mode",
+        "lsp_output",
+        "optional_backend_features"
+      ]
+    },
+    {
+      "library": "ai-interop",
+      "features": [
+        "capability_profile",
+        "normalized_error_envelope",
+        "machine_readable_registry"
+      ]
+    },
+    {
+      "library": "knowledge-pack",
+      "features": [
+        "domain_glossary",
+        "prompt_patterns",
+        "integration_checklists"
+      ]
+    }
+  ]
+}

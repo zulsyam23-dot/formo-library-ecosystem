@@ -1,0 +1,8 @@
+﻿import "views/header.fm" as Header;
+component App(title: string, subtitle?: string) {
+  <Header title=title>
+    <For each=[{name: "A"}, {name: "B"}] as=item>
+      <Text value=item.name/>
+    </For>
+  </Header>
+}

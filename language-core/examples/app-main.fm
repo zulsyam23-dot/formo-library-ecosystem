@@ -1,0 +1,34 @@
+import "views/header.fm" as Header;
+
+component App() {
+  <Page>
+    <Header title="Halo dari App">
+      <Text value="Konten dari App lewat slot" style=BodyText/>
+    </Header>
+    <Input value=username onChange=updateUsername placeholder="Ketik nama kamu..." style=BodyText/>
+    <Row>
+      <Checkbox checked=showModal onChange=toggleModal label="Tampilkan modal"/>
+      <Button label="Buka Modal" onPress=openModal/>
+    </Row>
+    <If when=showModal>
+      <Text value="Status: modal sedang aktif" style=BodyText/>
+    </If>
+    <Card>
+      <Text value="Daftar object dari For:" style=BodyText/>
+      <For each=[{active: true, name: "Item A", tags: ["core", "featured"]}, {active: false, name: "Item B", tags: ["archive", "beta"]}, {active: true, name: "Item C", tags: ["stable", "public"]}] as=item>
+        <Row>
+          <Text value=item.name style=BodyText/>
+          <Text value=item.tags.0 style=BodyText/>
+          <If when=item.active>
+            <Text value="(aktif)" style=BodyText/>
+          </If>
+        </Row>
+      </For>
+    </Card>
+    <Modal open=showModal onClose=closeModal>
+      <Card>
+        <Text value="Modal aktif. Klik backdrop atau tombol Close."/>
+      </Card>
+    </Modal>
+  </Page>
+}

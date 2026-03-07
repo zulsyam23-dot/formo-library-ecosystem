@@ -1,0 +1,20 @@
+{
+  "library": "ai-interop",
+  "status": "bootstrap",
+  "inputs": [
+    "registry metadata",
+    "diagnostic payloads",
+    "library capability declarations"
+  ],
+  "outputs": [
+    "ai capability profile",
+    "normalized error envelope",
+    "interop conventions"
+  ],
+  "capabilities": [
+    "capability_profile",
+    "normalized_error_envelope",
+    "machine_readable_registry"
+  ],
+  "maps_to_crates": []
+}

@@ -1,0 +1,23 @@
+{
+  "library": "language-style",
+  "status": "active",
+  "inputs": [
+    ".fs style files",
+    "style references from fm"
+  ],
+  "outputs": [
+    "style registry",
+    "token map",
+    "style diagnostics"
+  ],
+  "capabilities": [
+    "style_parser",
+    "token_system",
+    "style_allowlist",
+    "unused_token_detection",
+    "style_reference_validation"
+  ],
+  "maps_to_crates": [
+    "programs/formo-style"
+  ]
+}

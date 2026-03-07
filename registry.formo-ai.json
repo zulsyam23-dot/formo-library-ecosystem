@@ -1,0 +1,119 @@
+{
+  "ecosystem": "formo",
+  "schema_version": "1.0.0",
+  "updated_at": "2026-03-07",
+  "entrypoint": "README.md",
+  "mandatory_feature_manifest": "mandatory-features.formo-ai.json",
+  "migration_status": "MIGRATION_STATUS.md",
+  "libraries": [
+    {
+      "id": "language.core",
+      "name": "Formo Language Core",
+      "folder": "language-core",
+      "status": "active",
+      "purpose": "Parsing, resolving, typing, and IR contracts for .fm sources.",
+      "maps_to_crates": [
+        "language-core/programs/formo-lexer",
+        "language-core/programs/formo-parser",
+        "language-core/programs/formo-resolver",
+        "language-core/programs/formo-typer",
+        "language-core/programs/formo-ir"
+      ],
+      "depends_on": []
+      ,
+      "feature_doc": "language-core/docs/FEATURES.md",
+      "capability_contract": "language-core/contracts/CAPABILITIES.json"
+    },
+    {
+      "id": "language.style",
+      "name": "Formo Style System",
+      "folder": "language-style",
+      "status": "active",
+      "purpose": "Style parser/compiler for .fs tokens and styles.",
+      "maps_to_crates": [
+        "language-style/programs/formo-style"
+      ],
+      "depends_on": [
+        "language.core"
+      ],
+      "feature_doc": "language-style/docs/FEATURES.md",
+      "capability_contract": "language-style/contracts/CAPABILITIES.json"
+    },
+    {
+      "id": "runtime.web",
+      "name": "Formo Web Runtime",
+      "folder": "runtime-web",
+      "status": "active",
+      "purpose": "Web rendering and JS runtime from Formo IR.",
+      "maps_to_crates": [
+        "runtime-web/programs/formo-backend-web"
+      ],
+      "depends_on": [
+        "language.core",
+        "language.style"
+      ],
+      "feature_doc": "runtime-web/docs/FEATURES.md",
+      "capability_contract": "runtime-web/contracts/CAPABILITIES.json"
+    },
+    {
+      "id": "runtime.desktop",
+      "name": "Formo Desktop Runtime",
+      "folder": "runtime-desktop",
+      "status": "active",
+      "purpose": "Desktop webview bundle and bridge based on Formo IR.",
+      "maps_to_crates": [
+        "runtime-desktop/programs/formo-backend-desktop"
+      ],
+      "depends_on": [
+        "language.core",
+        "language.style"
+      ],
+      "feature_doc": "runtime-desktop/docs/FEATURES.md",
+      "capability_contract": "runtime-desktop/contracts/CAPABILITIES.json"
+    },
+    {
+      "id": "tooling.cli",
+      "name": "Formo Tooling",
+      "folder": "tooling",
+      "status": "active",
+      "purpose": "CLI orchestration, diagnostics, watch, and benchmark commands.",
+      "maps_to_crates": [
+        "tooling/programs/formo-cli"
+      ],
+      "depends_on": [
+        "language.core",
+        "language.style",
+        "runtime.web",
+        "runtime.desktop"
+      ],
+      "feature_doc": "tooling/docs/FEATURES.md",
+      "capability_contract": "tooling/contracts/CAPABILITIES.json"
+    },
+    {
+      "id": "ai.interop",
+      "name": "Formo AI Interop",
+      "folder": "ai-interop",
+      "status": "bootstrap",
+      "purpose": "Conventions and adapters for AI-first interactions with Formo.",
+      "maps_to_crates": [],
+      "depends_on": [
+        "language.core"
+      ],
+      "feature_doc": "ai-interop/docs/FEATURES.md",
+      "capability_contract": "ai-interop/contracts/CAPABILITIES.json"
+    },
+    {
+      "id": "knowledge.pack",
+      "name": "Formo Knowledge Pack",
+      "folder": "knowledge-pack",
+      "status": "bootstrap",
+      "purpose": "Prompt-ready domain knowledge and patterns for AI agents.",
+      "maps_to_crates": [],
+      "depends_on": [
+        "ai.interop"
+      ],
+      "feature_doc": "knowledge-pack/docs/FEATURES.md",
+      "capability_contract": "knowledge-pack/contracts/CAPABILITIES.json"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+[package]
+name = "formo-cli"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["backend-web", "backend-desktop"]
+backend-web = ["dep:formo-backend-web"]
+backend-desktop = ["dep:formo-backend-desktop"]
+
+[[bin]]
+name = "formo"
+path = "src/main.rs"
+
+[dependencies]
+formo-parser = { workspace = true }
+formo-resolver = { workspace = true }
+formo-typer = { workspace = true }
+formo-style = { workspace = true }
+formo-ir = { workspace = true }
+formo-backend-web = { workspace = true, optional = true }
+formo-backend-desktop = { workspace = true, optional = true }
+serde_json = { workspace = true }

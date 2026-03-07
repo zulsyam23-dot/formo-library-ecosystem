@@ -1,0 +1,23 @@
+{
+  "library": "runtime-web",
+  "status": "active",
+  "inputs": [
+    "public ir",
+    "compiled style map"
+  ],
+  "outputs": [
+    "index.html",
+    "app.css",
+    "app.js"
+  ],
+  "capabilities": [
+    "web_artifact_emit",
+    "state_action_runtime",
+    "if_for_runtime",
+    "modal_accessibility",
+    "keyed_for_patch"
+  ],
+  "maps_to_crates": [
+    "programs/formo-backend-web"
+  ]
+}

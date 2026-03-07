@@ -1,0 +1,23 @@
+[package]
+name = "formo-parser-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[workspace]
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.formo-parser]
+path = ".."
+
+[[bin]]
+name = "parser_parse"
+path = "fuzz_targets/parser_parse.rs"
+test = false
+doc = false
+bench = false

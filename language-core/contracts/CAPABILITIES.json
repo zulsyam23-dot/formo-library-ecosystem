@@ -1,0 +1,30 @@
+{
+  "library": "language-core",
+  "status": "active",
+  "inputs": [
+    ".fm source files",
+    ".fs import references",
+    "component graph"
+  ],
+  "outputs": [
+    "tokens",
+    "ast",
+    "resolved modules",
+    "typed semantic model",
+    "public ir"
+  ],
+  "capabilities": [
+    "lexer_diagnostics",
+    "parser_recovery",
+    "import_resolution",
+    "type_validation",
+    "public_ir_contract"
+  ],
+  "maps_to_crates": [
+    "programs/formo-lexer",
+    "programs/formo-parser",
+    "programs/formo-resolver",
+    "programs/formo-typer",
+    "programs/formo-ir"
+  ]
+}

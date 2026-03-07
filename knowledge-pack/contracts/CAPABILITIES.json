@@ -1,0 +1,20 @@
+{
+  "library": "knowledge-pack",
+  "status": "bootstrap",
+  "inputs": [
+    "official formo docs",
+    "feature contracts",
+    "diagnostic semantics"
+  ],
+  "outputs": [
+    "glossary",
+    "prompt patterns",
+    "integration checklist"
+  ],
+  "capabilities": [
+    "domain_glossary",
+    "prompt_patterns",
+    "integration_checklists"
+  ],
+  "maps_to_crates": []
+}

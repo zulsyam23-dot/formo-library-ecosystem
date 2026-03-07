@@ -1,0 +1,8 @@
+﻿[package]
+name = "formo-backend-web"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+formo-ir = { workspace = true }
+serde_json = { workspace = true }
