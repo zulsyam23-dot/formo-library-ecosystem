@@ -66,7 +66,6 @@ pub(super) fn render_frame_container(
             border_color: parse_hex_color("#d4d8e5"),
             border_width: Some(1.0),
             border_radius: Some(14.0),
-            padding: Some(crate::style::Edges::same(12.0)),
             shadow: Some(egui::epaint::Shadow {
                 offset: egui::vec2(0.0, 8.0),
                 blur: 24.0,
@@ -89,19 +88,40 @@ pub(super) fn render_frame_container(
     with_style_container(ui, style, defaults, |ui| {
         apply_gap(ui, style.gap, Some(8.0));
         if let Some(title) = prop_string(node, "title", scope) {
-            show_text(
-                ui,
-                apply_text_style(
-                    RichText::new(title).size(16.0).strong(),
-                    style,
-                    parse_hex_color("#151515"),
-                    Some(700.0),
-                    false,
-                ),
-                style.text_align,
-            );
             if node.widget == "Window" {
+                egui::Frame::none()
+                    .inner_margin(egui::Margin {
+                        left: 16.0,
+                        right: 16.0,
+                        top: 12.0,
+                        bottom: 12.0,
+                    })
+                    .show(ui, |ui| {
+                        show_text(
+                            ui,
+                            apply_text_style(
+                                RichText::new(title).size(16.0).strong(),
+                                style,
+                                parse_hex_color("#151515"),
+                                Some(700.0),
+                                false,
+                            ),
+                            style.text_align,
+                        );
+                    });
                 ui.separator();
+            } else {
+                show_text(
+                    ui,
+                    apply_text_style(
+                        RichText::new(title).size(16.0).strong(),
+                        style,
+                        parse_hex_color("#151515"),
+                        Some(700.0),
+                        false,
+                    ),
+                    style.text_align,
+                );
             }
         }
         for child in &node.children {

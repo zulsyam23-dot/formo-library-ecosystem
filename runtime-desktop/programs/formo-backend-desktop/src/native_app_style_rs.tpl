@@ -165,7 +165,7 @@ impl RenderStyle {
             flow: style_text(node, &["flex-direction", "flexDirection"]).and_then(parse_flow),
             align: style_text(node, &["align-items", "alignItems"])
                 .and_then(parse_align)
-                .unwrap_or(AlignMode::Start),
+                .unwrap_or(AlignMode::Stretch),
             justify: style_text(node, &["justify-content", "justifyContent"])
                 .and_then(parse_justify)
                 .unwrap_or(JustifyMode::Start),

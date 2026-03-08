@@ -122,13 +122,15 @@ impl eframe::App for FormoNativeApp {
                 });
         }
 
-        egui::CentralPanel::default().show(ctx, |ui| {
-            if let Some(root) = self.entry_root().cloned() {
-                render_tree(ui, &root, &mut self.state, &mut self.action_log);
-            } else {
-                ui.colored_label(Color32::RED, "No entry component found in app.native.json");
-            }
-        });
+        egui::CentralPanel::default()
+            .frame(egui::Frame::none().inner_margin(egui::Margin::same(16.0)))
+            .show(ctx, |ui| {
+                if let Some(root) = self.entry_root().cloned() {
+                    render_tree(ui, &root, &mut self.state, &mut self.action_log);
+                } else {
+                    ui.colored_label(Color32::RED, "No entry component found in app.native.json");
+                }
+            });
 
         if debug_enabled {
             egui::TopBottomPanel::bottom("formo-native-debug")

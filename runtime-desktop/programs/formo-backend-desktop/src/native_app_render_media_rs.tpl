@@ -155,6 +155,7 @@ pub(super) fn render_modal(
 
     let window_output = egui::Window::new(title)
         .id(egui::Id::new(format!("{modal_id}-window")))
+        .title_bar(false)
         .collapsible(false)
         .resizable(false)
         .movable(false)

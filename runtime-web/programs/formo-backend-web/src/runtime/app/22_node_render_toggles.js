@@ -45,8 +45,10 @@
           });
         }
 
-        const slider = el("span", "fm-switch-slider");
+        const text = propAsString(node, "label", scope) || "Switch";
+        const caption = el("span", "fm-switch-label");
+        caption.textContent = text;
         element.appendChild(input);
-        element.appendChild(slider);
+        element.appendChild(caption);
         break;
       }
