@@ -1,32 +1,70 @@
 # Library: runtime-desktop
 
-## Tanggung jawab
+`runtime-desktop` adalah backend emitter Formo untuk target native desktop Rust.
 
-- Emit artifact desktop native Rust dari Formo IR.
-- Menjaga style parity inti antara web dan desktop native.
-- Menyediakan widget parity tambahan (`Image`, `Spacer`, `Checkbox`, `Switch`, `Modal`, `Fragment`, `If`, `For`).
-- Menambahkan parity diagnostics (warning style/widget unsupported) ke output native.
-- Menyediakan kontrak action/state bridge untuk host desktop Rust.
+## Apa yang Ditangani
 
-## Input/Output
+- emit bundle native: `app.native.json`, `app.native.rs`, `app.ir.json`
+- generate scaffold runnable app: `native-app/*`
+- parity diagnostics untuk gap style/widget desktop
+- readable artifacts untuk inspeksi AI/manusia
+- bridge action/state untuk host desktop
 
-- Input: Formo IR.
-- Output:
-  - `app.native.json`, `app.native.rs`, `app.ir.json`
-  - scaffold runnable app: `native-app/Cargo.toml`, `native-app/src/main.rs`, `native-app/README.md`
-  - opsi CLI `formo build --target desktop --release-exe` untuk compile langsung binary release native app
+## Apa yang Tidak Ditangani
 
-## Batas domain
+- parser/typer bahasa Formo
+- style parser `.fs`
+- runtime browser/web asset
 
-- Tidak mendefinisikan syntax bahasa.
-- Tidak menyimpan logika parser/typer.
-- Tidak mengandung runtime webview/web asset.
+## Status dan Capability
 
-## Mapping implementasi saat ini
+- status kontrak: `active`
+- capability utama:
+  - `desktop_native_bundle_emit`
+  - `desktop_native_scaffold_emit`
+  - `desktop_style_parity_core`
+  - `desktop_widget_parity_extended`
+  - `desktop_host_actions`
+  - `desktop_state_bridge`
+  - `ir_snapshot_emit`
+  - `desktop_parity_diagnostics`
+  - `desktop_readable_artifacts`
+
+Sumber: `contracts/CAPABILITIES.json`.
+
+## Input dan Output
+
+- input:
+  - `public ir`
+  - `compiled style map`
+- output:
+  - `app.native.json`
+  - `app.native.rs`
+  - `app.ir.json`
+  - `native-app/Cargo.toml`
+  - `native-app/src/*`
+  - `native-app/README.md`
+  - `readable/README.md`
+  - `readable/native/*.json`
+  - `readable/ir/*.json`
+
+## Mapping Implementasi
 
 - `programs/formo-backend-desktop`
 
-## Artefak migrasi fitur
+## Validasi Cepat
+
+```bash
+cargo test -p formo-backend-desktop
+```
+
+## Build Native Release via CLI
+
+```bash
+cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --release-exe
+```
+
+## Artefak Dokumentasi
 
 - `docs/FEATURES.md`
 - `contracts/CAPABILITIES.json`

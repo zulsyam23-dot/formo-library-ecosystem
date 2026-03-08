@@ -1,4 +1,11 @@
-# Referensi Bahasa Style Formo (`.fs`)
+﻿# Referensi Bahasa Style Formo (`.fs`)
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/02-formo-style-reference.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Dokumen ini menjelaskan syntax style Formo, token system, tipe value, validasi, dan praktik terbaik.
 
@@ -224,3 +231,4 @@ Untuk menjaga hasil visual mirip:
 1. Prioritaskan property core (`color`, `background`, `padding`, `margin`, `font-*`, `gap`, `border*`).
 2. Pantau warning parity desktop di `app.native.json.diagnostics`.
 3. Jika ada style unsupported desktop, siapkan fallback yang tetap readable.
+

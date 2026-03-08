@@ -1,24 +1,60 @@
 # Library: language-style
 
-## Tanggung jawab
+`language-style` adalah compiler style Formo untuk file `.fs`.
 
-- Definisi syntax `.fs`, token style, dan kompilasi style ke IR/style output.
+## Apa yang Ditangani
 
-## Input/Output
+- style parser
+- token system
+- style allowlist validation
+- unused token detection
+- style reference validation
 
-- Input: file `.fs`.
-- Output: style registry, token map, dan diagnostic style.
+## Apa yang Tidak Ditangani
 
-## Batas domain
+- parser/typer `.fm`
+- runtime rendering web/desktop
+- orchestration CLI lintas target
 
-- Tidak memproses parser `.fm`.
-- Tidak mengurus runtime rendering.
+## Status dan Capability
 
-## Mapping implementasi saat ini
+- status kontrak: `active`
+- capability utama:
+  - `style_parser`
+  - `token_system`
+  - `style_allowlist`
+  - `unused_token_detection`
+  - `style_reference_validation`
+
+Sumber: `contracts/CAPABILITIES.json`.
+
+## Input dan Output
+
+- input:
+  - `.fs style files`
+  - `style references from fm`
+- output:
+  - `style registry`
+  - `token map`
+  - `style diagnostics`
+
+## Mapping Implementasi
 
 - `programs/formo-style`
 
-## Artefak migrasi fitur
+## Integrasi dengan Library URI
+
+- style module bisa diimport dari library:
+  - `import "lib://matimatika/base.fs" as MathBase;`
+- resolusi URI `lib://` dilakukan oleh `formo-resolver`.
+
+## Validasi Cepat
+
+```bash
+cargo test -p formo-style
+```
+
+## Artefak Dokumentasi
 
 - `docs/FEATURES.md`
 - `contracts/CAPABILITIES.json`

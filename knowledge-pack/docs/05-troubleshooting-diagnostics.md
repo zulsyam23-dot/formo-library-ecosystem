@@ -1,4 +1,11 @@
-# Troubleshooting dan Diagnostics Formo
+﻿# Troubleshooting dan Diagnostics Formo
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/05-troubleshooting-diagnostics.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Dokumen ini untuk mempercepat investigasi error compile/build/runtime artifact.
 
@@ -6,7 +13,7 @@ Dokumen ini untuk mempercepat investigasi error compile/build/runtime artifact.
 
 Urutan paling efektif:
 
-1. `check --json-pretty`
+1. `cargo run -p formo-cli -- check --input main.fm --json-pretty`
 2. lihat `stage`
 3. lihat `errorMeta.code` + lokasi
 4. perbaiki dari stage paling awal
@@ -140,15 +147,16 @@ Fokus field JSON:
 
 1. Source `.fm` valid.
 2. Source `.fs` valid.
-3. `check` dan `diagnose` bersih.
+3. `cargo run -p formo-cli -- check --input main.fm --json` dan `cargo run -p formo-cli -- diagnose --input main.fm --json` bersih.
 4. Build berhasil.
 5. Jika desktop mismatch, bandingkan parity warning dulu.
 
 ## 11) Workflow Incident Response (Tim)
 
 1. Reproduce di branch kecil.
-2. Simpan output `check --json-pretty`.
+2. Simpan output `cargo run -p formo-cli -- check --input main.fm --json-pretty`.
 3. Klasifikasikan stage.
 4. Fix minimal.
 5. Re-run pipeline.
 6. Tulis postmortem singkat dengan code error dan root cause.
+

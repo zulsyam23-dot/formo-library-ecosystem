@@ -1,4 +1,11 @@
-# Case Studies Formo (End-to-End)
+﻿# Case Studies Formo (End-to-End)
+
+## AI Quick Context
+- doc_path: knowledge-pack/examples/case-studies.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 ## Kasus 1: Halaman Teks Sederhana
 
@@ -180,3 +187,4 @@ component App() {
   <Header title="Dashboard"/>
 }
 ```
+

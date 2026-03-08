@@ -1,4 +1,11 @@
-# Learning Path Formo (7 Hari)
+﻿# Learning Path Formo (7 Hari)
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/07-learning-path.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Kurikulum ini dirancang agar developer baru bisa produktif cepat dan tetap mengikuti praktik terbaik Formo.
 
@@ -33,7 +40,7 @@ Latihan:
 
 1. gunakan `Button`, `Input`, `Checkbox`.
 2. sengaja kirim tipe salah untuk prop built-in, amati `E2251`.
-3. perbaiki sampai `check` bersih.
+3. perbaiki sampai `cargo run -p formo-cli -- check --input main.fm` bersih.
 
 ## Hari 3: Style Formo dan Token
 
@@ -70,10 +77,10 @@ Target:
 
 Latihan:
 
-1. jalankan `diagnose --json-pretty`.
+1. jalankan `cargo run -p formo-cli -- diagnose --input main.fm --json-pretty`.
 2. baca field `stage` dan `errorMeta`.
-3. jalankan `doctor --json-schema`.
-4. jalankan `fmt --check`.
+3. jalankan `cargo run -p formo-cli -- doctor --input main.fm --json-schema`.
+4. jalankan `cargo run -p formo-cli -- fmt --input main.fm --check`.
 
 ## Hari 6: Build Runtime (Web + Desktop)
 
@@ -103,11 +110,11 @@ Target:
 Latihan:
 
 1. susun pipeline:
-   - `fmt --check`
-   - `check --json`
-   - `diagnose --json`
-   - `build --target multi --prod`
-   - `bench`
+   - `cargo run -p formo-cli -- fmt --input main.fm --check`
+   - `cargo run -p formo-cli -- check --input main.fm --json`
+   - `cargo run -p formo-cli -- diagnose --input main.fm --json`
+   - `cargo run -p formo-cli -- build --target multi --input main.fm --out dist --prod`
+   - `cargo run -p formo-cli -- bench --input main.fm --iterations 20 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json`
 2. buat checklist rilis.
 3. praktikkan prompt AI untuk patch kecil + verifikasi.
 
@@ -119,3 +126,4 @@ Latihan:
 4. Bisa build web + desktop.
 5. Bisa compile desktop release executable.
 6. Bisa menjalankan quality gate sebelum merge.
+

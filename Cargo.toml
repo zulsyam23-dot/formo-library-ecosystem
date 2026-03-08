@@ -2,6 +2,7 @@
 members = [
   "language-core/programs/formo-lexer",
   "language-core/programs/formo-parser",
+  "language-core/programs/formo-logic",
   "language-core/programs/formo-resolver",
   "language-core/programs/formo-typer",
   "language-core/programs/formo-ir",
@@ -23,6 +24,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 formo-lexer = { path = "language-core/programs/formo-lexer" }
 formo-parser = { path = "language-core/programs/formo-parser" }
+formo-logic = { path = "language-core/programs/formo-logic" }
 formo-resolver = { path = "language-core/programs/formo-resolver" }
 formo-typer = { path = "language-core/programs/formo-typer" }
 formo-style = { path = "language-style/programs/formo-style" }

@@ -1,4 +1,11 @@
-# Integration Checklist Formo
+﻿# Integration Checklist Formo
+
+## AI Quick Context
+- doc_path: knowledge-pack/examples/integration-checklist.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Checklist ini dipakai saat onboarding project baru atau sebelum release.
 
@@ -24,10 +31,10 @@ Checklist ini dipakai saat onboarding project baru atau sebelum release.
 
 ## D) Command Validasi
 
-- [ ] `fmt --check` lulus.
-- [ ] `check --json` lulus.
-- [ ] `diagnose --json` lulus.
-- [ ] `doctor --json` tidak ada blocker.
+- [ ] `cargo run -p formo-cli -- fmt --input main.fm --check` lulus.
+- [ ] `cargo run -p formo-cli -- check --input main.fm --json` lulus.
+- [ ] `cargo run -p formo-cli -- diagnose --input main.fm --json` lulus.
+- [ ] `cargo run -p formo-cli -- doctor --input main.fm --json` tidak ada blocker.
 
 ## E) Build Target
 
@@ -48,3 +55,4 @@ Checklist ini dipakai saat onboarding project baru atau sebelum release.
 - [ ] artifact final tervalidasi.
 - [ ] changelog diperbarui.
 - [ ] dokumentasi fitur baru diperbarui.
+

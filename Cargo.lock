@@ -26,6 +26,7 @@ dependencies = [
  "formo-backend-desktop",
  "formo-backend-web",
  "formo-ir",
+ "formo-logic",
  "formo-parser",
  "formo-resolver",
  "formo-style",
@@ -43,6 +44,10 @@ dependencies = [
 
 [[package]]
 name = "formo-lexer"
+version = "0.1.0"
+
+[[package]]
+name = "formo-logic"
 version = "0.1.0"
 
 [[package]]

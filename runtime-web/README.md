@@ -1,25 +1,54 @@
 # Library: runtime-web
 
-## Tanggung jawab
+`runtime-web` adalah backend emitter Formo untuk target browser.
 
-- Emit `index.html`, `app.css`, `app.js`.
-- Menyediakan runtime DOM untuk state/action/control-flow.
+## Apa yang Ditangani
 
-## Input/Output
+- emit artifact web (`index.html`, `app.css`, `app.js`)
+- emit runtime source terpecah (`runtime/app/*.js`)
+- runtime state/action/control flow untuk output web
 
-- Input: Formo IR.
-- Output: bundle web siap jalan.
+## Apa yang Tidak Ditangani
 
-## Batas domain
+- grammar dan type system bahasa Formo
+- style parser `.fs`
+- host bridge desktop native
 
-- Tidak mendefinisikan grammar bahasa Formo.
-- Tidak berisi business rule parser/typer.
+## Status dan Capability
 
-## Mapping implementasi saat ini
+- status kontrak: `active`
+- capability utama:
+  - `web_artifact_emit`
+  - `state_action_runtime`
+  - `if_for_runtime`
+  - `modal_accessibility`
+  - `keyed_for_patch`
+
+Sumber: `contracts/CAPABILITIES.json`.
+
+## Input dan Output
+
+- input:
+  - `public ir`
+  - `compiled style map`
+- output:
+  - `index.html`
+  - `app.css`
+  - `app.js`
+  - `runtime/README.md`
+  - `runtime/app/*.js`
+
+## Mapping Implementasi
 
 - `programs/formo-backend-web`
 
-## Artefak migrasi fitur
+## Validasi Cepat
+
+```bash
+cargo test -p formo-backend-web
+```
+
+## Artefak Dokumentasi
 
 - `docs/FEATURES.md`
 - `contracts/CAPABILITIES.json`

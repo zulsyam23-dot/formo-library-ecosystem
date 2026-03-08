@@ -1,27 +1,92 @@
-const APP_JS_CHUNKS: &[&str] = &[
-    include_str!("runtime/app/00_prelude.js"),
-    include_str!("runtime/app/10_render_core.js"),
-    include_str!("runtime/app/20_node_render_layout.js"),
-    include_str!("runtime/app/21_node_render_button.js"),
-    include_str!("runtime/app/22_node_render_input.js"),
-    include_str!("runtime/app/22_node_render_toggles.js"),
-    include_str!("runtime/app/23_node_render_modal.js"),
-    include_str!("runtime/app/24_node_render_if_for.js"),
-    include_str!("runtime/app/25_node_render_finalize.js"),
-    include_str!("runtime/app/30_for_usage.js"),
-    include_str!("runtime/app/31_for_binding.js"),
-    include_str!("runtime/app/32_for_render.js"),
-    include_str!("runtime/app/40_prop_record_string.js"),
-    include_str!("runtime/app/40_prop_bool_len.js"),
-    include_str!("runtime/app/40_prop_list.js"),
-    include_str!("runtime/app/41_prop_scope.js"),
-    include_str!("runtime/app/42_prop_utils.js"),
-    include_str!("runtime/app/50_actions_state.js"),
-    include_str!("runtime/app/60_focus_dom.js"),
+pub(crate) const APP_JS_PARTS: &[(&str, &str)] = &[
+    (
+        "runtime/app/00_prelude.js",
+        include_str!("runtime/app/00_prelude.js"),
+    ),
+    (
+        "runtime/app/10_render_core.js",
+        include_str!("runtime/app/10_render_core.js"),
+    ),
+    (
+        "runtime/app/20_node_render_layout.js",
+        include_str!("runtime/app/20_node_render_layout.js"),
+    ),
+    (
+        "runtime/app/21_node_render_button.js",
+        include_str!("runtime/app/21_node_render_button.js"),
+    ),
+    (
+        "runtime/app/22_node_render_input.js",
+        include_str!("runtime/app/22_node_render_input.js"),
+    ),
+    (
+        "runtime/app/22_node_render_toggles.js",
+        include_str!("runtime/app/22_node_render_toggles.js"),
+    ),
+    (
+        "runtime/app/23_node_render_modal.js",
+        include_str!("runtime/app/23_node_render_modal.js"),
+    ),
+    (
+        "runtime/app/24_node_render_if_for.js",
+        include_str!("runtime/app/24_node_render_if_for.js"),
+    ),
+    (
+        "runtime/app/25_node_render_finalize.js",
+        include_str!("runtime/app/25_node_render_finalize.js"),
+    ),
+    (
+        "runtime/app/30_for_usage.js",
+        include_str!("runtime/app/30_for_usage.js"),
+    ),
+    (
+        "runtime/app/31_for_binding.js",
+        include_str!("runtime/app/31_for_binding.js"),
+    ),
+    (
+        "runtime/app/32_for_render.js",
+        include_str!("runtime/app/32_for_render.js"),
+    ),
+    (
+        "runtime/app/40_prop_record_string.js",
+        include_str!("runtime/app/40_prop_record_string.js"),
+    ),
+    (
+        "runtime/app/40_prop_bool_len.js",
+        include_str!("runtime/app/40_prop_bool_len.js"),
+    ),
+    (
+        "runtime/app/40_prop_list.js",
+        include_str!("runtime/app/40_prop_list.js"),
+    ),
+    (
+        "runtime/app/41_prop_scope.js",
+        include_str!("runtime/app/41_prop_scope.js"),
+    ),
+    (
+        "runtime/app/42_prop_utils.js",
+        include_str!("runtime/app/42_prop_utils.js"),
+    ),
+    (
+        "runtime/app/50_actions_state.js",
+        include_str!("runtime/app/50_actions_state.js"),
+    ),
+    (
+        "runtime/app/60_focus_dom.js",
+        include_str!("runtime/app/60_focus_dom.js"),
+    ),
 ];
 
 pub(crate) fn app_js() -> String {
-    APP_JS_CHUNKS.join("\n\n")
+    APP_JS_PARTS
+        .iter()
+        .map(|(_, content)| *content)
+        .collect::<Vec<_>>()
+        .join("\n\n")
+}
+
+pub(crate) fn app_js_parts() -> Vec<(&'static str, &'static str)> {
+    APP_JS_PARTS.to_vec()
 }
 
 pub(crate) fn dev_bootstrap_script() -> &'static str {

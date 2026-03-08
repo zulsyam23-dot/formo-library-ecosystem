@@ -1,0 +1,38 @@
+module SessionService;
+
+service SessionService {
+  state {
+    retries: int = 0;
+  }
+
+  event bootstrap {
+    action set retries = 0;
+    action call Runtime.trace;
+
+    if hasCachedSession {
+      action emit "SESSION_RESTORED";
+    }
+
+    for preloadStep in preloadSteps {
+      action call Runtime.trace;
+    }
+
+    while shouldRetry {
+      action call Runtime.sleep;
+      if shouldStopRetry {
+        action break;
+      }
+      action set retries = retries + 1;
+      if shouldSkipHeavyStep {
+        action continue;
+      }
+      action call Runtime.trace;
+    }
+
+    match sessionMode {
+      action emit "SESSION_READY";
+    }
+
+    action return;
+  }
+}

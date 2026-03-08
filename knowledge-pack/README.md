@@ -1,29 +1,67 @@
 # Library: knowledge-pack
 
-## Tanggung jawab
+`knowledge-pack` adalah library dokumentasi operasional Formo yang dioptimalkan untuk konsumsi AI dan developer.
 
-- Menyimpan pengetahuan domain yang siap dipakai AI agent:
-  - glossary,
-  - pattern,
-  - contoh prompt dan output.
+## Apa yang Ditangani
 
-## Input/Output
+- domain glossary
+- quickstart dan language/style/runtime references
+- troubleshooting matrix
+- AI playbook dan prompt patterns
+- learning path, architecture playbook, quality gates, integration checklist
 
-- Input: dokumentasi dan aturan resmi Formo.
-- Output: knowledge pack terstruktur untuk otomasi AI.
+## Apa yang Tidak Ditangani
 
-## Status
+- compile pipeline Rust crate
+- runtime backend execution
+- parser/typer/style implementation
 
-- `active` (dokumen lengkap quickstart, referensi bahasa, style, runtime, teknik, troubleshooting, dan AI playbook).
+## Status dan Capability
 
-## Artefak migrasi fitur
+- status kontrak: `active`
+- capability utama:
+  - `domain_glossary`
+  - `quickstart_guide`
+  - `formo_language_reference`
+  - `formo_style_reference`
+  - `cli_runtime_reference`
+  - `programming_techniques`
+  - `troubleshooting_matrix`
+  - `prompt_patterns`
+  - `case_study_examples`
+  - `learning_path_curriculum`
+  - `project_architecture_playbook`
+  - `quality_gates_reference`
+  - `integration_checklist`
+  - `ai_playbook`
 
-- `docs/FEATURES.md`
-- `contracts/CAPABILITIES.json`
-- `docs/README.md`
-- `docs/07-learning-path.md`
-- `docs/08-project-architecture.md`
-- `docs/09-quality-gates.md`
-- `examples/glossary.md`
-- `examples/case-studies.md`
-- `examples/ai-prompts.md`
+Sumber: `contracts/CAPABILITIES.json`.
+
+## Input dan Output
+
+- input:
+  - `official formo docs`
+  - `feature contracts`
+  - `diagnostic semantics`
+- output:
+  - dokumen referensi siap pakai untuk manusia dan AI
+  - contoh prompt/checklist untuk workflow harian
+
+## Mapping Implementasi
+
+- tidak memiliki crate Rust (`maps_to_crates` kosong)
+- implementasi utama berupa dokumen terstruktur
+
+## Struktur Kunci
+
+- `docs/` - referensi utama
+- `examples/` - glossary, case studies, prompt templates, integration checklist
+- `contracts/` - capability contract library
+- `specs/` - ruang lingkup dan quality criteria
+
+## Cara Pakai Cepat
+
+1. Mulai dari `docs/README.md`.
+2. Gunakan `docs/00-quickstart.md` untuk alur end-to-end.
+3. Gunakan `examples/ai-prompts.md` saat pairing dengan AI agent.
+4. Gunakan `examples/integration-checklist.md` untuk gate sebelum release.

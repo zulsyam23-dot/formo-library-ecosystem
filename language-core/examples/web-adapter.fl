@@ -1,0 +1,7 @@
+module WebAdapter;
+
+adapter WebAdapter {
+  event syncBrowserRoute {
+    action call Browser.historyPush;
+  }
+}

@@ -6,6 +6,7 @@ Daftar fitur runtime web Formo yang wajib tersedia di library ini.
 
 1. `web_artifact_emit`
    - Emit `index.html`, `app.css`, `app.js`.
+   - Emit source runtime terpecah `runtime/app/*.js` + `runtime/README.md` untuk mode readable artifact.
 2. `state_action_runtime`
    - Runtime state/action melalui `window.formoState` dan `window.formoActions`.
 3. `if_for_runtime`

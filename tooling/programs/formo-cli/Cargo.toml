@@ -14,6 +14,7 @@ path = "src/main.rs"
 
 [dependencies]
 formo-parser = { workspace = true }
+formo-logic = { workspace = true }
 formo-resolver = { workspace = true }
 formo-typer = { workspace = true }
 formo-style = { workspace = true }

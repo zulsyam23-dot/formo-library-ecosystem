@@ -1,0 +1,7 @@
+module DesktopAdapter;
+
+adapter DesktopAdapter {
+  event focusMainWindow {
+    action call Desktop.windowFocus;
+  }
+}

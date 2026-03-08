@@ -12,24 +12,46 @@ impl Backend for WebBackend {
         let html = html::render_index_html(&ir.entry, &state_json, runtime::dev_bootstrap_script());
         let css = css::render_css(ir);
         let js = runtime::app_js();
+        let mut files = vec![
+            OutputFile {
+                path: "index.html".to_string(),
+                content: html,
+            },
+            OutputFile {
+                path: "app.css".to_string(),
+                content: css,
+            },
+            OutputFile {
+                path: "app.js".to_string(),
+                content: js,
+            },
+            OutputFile {
+                path: "runtime/README.md".to_string(),
+                content: readable_runtime_readme(),
+            },
+        ];
 
-        Ok(BackendOutput {
-            files: vec![
-                OutputFile {
-                    path: "index.html".to_string(),
-                    content: html,
-                },
-                OutputFile {
-                    path: "app.css".to_string(),
-                    content: css,
-                },
-                OutputFile {
-                    path: "app.js".to_string(),
-                    content: js,
-                },
-            ],
-        })
+        for (path, content) in runtime::app_js_parts() {
+            files.push(OutputFile {
+                path: path.to_string(),
+                content: content.to_string(),
+            });
+        }
+
+        Ok(BackendOutput { files })
     }
+}
+
+fn readable_runtime_readme() -> String {
+    let mut out = String::from(
+        "# Web Runtime (Readable)\n\nFile `app.js` adalah bundle runtime untuk eksekusi cepat.\n\nFolder ini berisi source runtime yang sama dalam bentuk terpecah agar mudah dibaca manusia dan AI:\n",
+    );
+    for (path, _) in runtime::app_js_parts() {
+        out.push_str("- `");
+        out.push_str(path);
+        out.push_str("`\n");
+    }
+    out
 }
 
 #[cfg(test)]
@@ -155,5 +177,22 @@ mod tests {
         assert!(js.contains("element.setAttribute(\"aria-modal\", \"true\")"));
         assert!(js.contains("function trapTabInContainer("));
         assert!(js.contains("focusFirstInContainer(panel, closeBtn)"));
+    }
+
+    #[test]
+    fn runtime_emits_readable_split_files() {
+        let backend = WebBackend;
+        let output = backend
+            .emit(&sample_ir_with_for_loop())
+            .expect("web emit should succeed");
+        assert!(output.files.iter().any(|f| f.path == "runtime/README.md"));
+        assert!(output
+            .files
+            .iter()
+            .any(|f| f.path == "runtime/app/10_render_core.js"));
+        assert!(output
+            .files
+            .iter()
+            .any(|f| f.path == "runtime/app/50_actions_state.js"));
     }
 }

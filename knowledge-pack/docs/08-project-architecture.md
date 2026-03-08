@@ -1,4 +1,11 @@
-# Project Architecture Playbook (Formo)
+﻿# Project Architecture Playbook (Formo)
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/08-project-architecture.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Panduan arsitektur ini membantu menjaga codebase Formo tetap rapi saat skala project bertambah.
 
@@ -127,7 +134,7 @@ Untuk komponen reusable:
 1. deklarasikan prop wajib secara eksplisit.
 2. gunakan tipe prop ketat (`string`, `int`, `state<string>`, dll).
 3. gunakan `<Slot/>` jika komponen perlu konten dari parent.
-4. hindari prop “serba guna” tanpa type.
+4. hindari prop "serba guna" tanpa type.
 
 ## 10) Pattern Multi-Target Delivery
 
@@ -141,7 +148,7 @@ Agar web/desktop tetap sejalan:
 
 Saran review policy:
 
-1. perubahan `.fm` wajib `check` + `diagnose`.
+1. perubahan `.fm` wajib `cargo run -p formo-cli -- check --input main.fm --json` + `cargo run -p formo-cli -- diagnose --input main.fm --json`.
 2. perubahan `.fs` wajib cek error `E13xx`.
 3. perubahan runtime-target wajib build target terkait.
 4. perubahan lintas domain wajib update docs.
@@ -152,3 +159,4 @@ Saran review policy:
 2. token campur dengan style per fitur tanpa struktur.
 3. style hardcode tersebar tanpa semantik.
 4. tidak ada pipeline verifikasi terstandar.
+

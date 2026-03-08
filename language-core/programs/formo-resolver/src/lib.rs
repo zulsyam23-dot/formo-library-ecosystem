@@ -3,6 +3,9 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+const LIBRARY_SCHEME: &str = "lib://";
+const LIBRARY_ROOT_ENV: &str = "FORMO_LIBRARY_ROOT";
+
 #[derive(Debug, Clone)]
 pub struct ResolvedProgram {
     pub ast: AstProgram,
@@ -18,8 +21,10 @@ pub fn resolve(root_ast: AstProgram, input_path: &str) -> Result<ResolvedProgram
         .parent()
         .map(Path::to_path_buf)
         .unwrap_or_else(|| PathBuf::from("."));
+    let library_root = discover_library_root(&root_dir);
     let mut state = ResolveState {
         root_dir,
+        library_root,
         ..ResolveState::default()
     };
     state.visit(root_path, Some(root_ast))?;
@@ -40,6 +45,7 @@ pub fn resolve(root_ast: AstProgram, input_path: &str) -> Result<ResolvedProgram
 #[derive(Default)]
 struct ResolveState {
     root_dir: PathBuf,
+    library_root: Option<PathBuf>,
     visiting: Vec<String>,
     visited: HashSet<String>,
     module_order: Vec<String>,
@@ -111,8 +117,11 @@ impl ResolveState {
                 }
             }
 
-            let import_path = resolve_import_path(&module_path, &import.path)
-                .map_err(|e| format_diag("E1202", &module_label, import.line, import.col, &e))?;
+            let import_path =
+                resolve_import_path(&module_path, &import.path, self.library_root.as_deref())
+                    .map_err(|e| {
+                        format_diag("E1202", &module_label, import.line, import.col, &e)
+                    })?;
             let import_key = path_to_string(&import_path);
             if is_style_module(&import_key) {
                 if self.seen_style_modules.insert(import_key.clone()) {
@@ -142,7 +151,11 @@ impl ResolveState {
     }
 
     fn display_module(&self, absolute_or_norm_path: &str) -> String {
-        compact_path(absolute_or_norm_path, &self.root_dir)
+        compact_path(
+            absolute_or_norm_path,
+            &self.root_dir,
+            self.library_root.as_deref(),
+        )
     }
 
     fn register_components(
@@ -183,7 +196,31 @@ fn canonicalize_existing(path: &Path) -> Result<PathBuf, String> {
     Ok(canonical)
 }
 
-fn resolve_import_path(module_file: &Path, import_path: &str) -> Result<PathBuf, String> {
+fn resolve_import_path(
+    module_file: &Path,
+    import_path: &str,
+    library_root: Option<&Path>,
+) -> Result<PathBuf, String> {
+    if let Some((library_name, module_rel_path)) = parse_library_uri(import_path) {
+        let Some(root) = library_root else {
+            return Err(format!(
+                "library root is not configured; set `{LIBRARY_ROOT_ENV}` or create `fl-libraries` near project root"
+            ));
+        };
+        let candidate = root.join(library_name).join(module_rel_path);
+        let from_display = module_file
+            .file_name()
+            .and_then(|name| name.to_str())
+            .map(str::to_string)
+            .unwrap_or_else(|| path_to_string(module_file));
+        return canonicalize_existing(&candidate).map_err(|_| {
+            format!(
+                "library import target not found: {} (from {})",
+                import_path, from_display
+            )
+        });
+    }
+
     let base_dir = module_file.parent().ok_or_else(|| {
         format!(
             "cannot resolve parent directory for module {}",
@@ -203,6 +240,51 @@ fn resolve_import_path(module_file: &Path, import_path: &str) -> Result<PathBuf,
             import_path, from_display
         )
     })
+}
+
+fn parse_library_uri(import_path: &str) -> Option<(&str, &str)> {
+    let raw = import_path.strip_prefix(LIBRARY_SCHEME)?;
+    let (library_name, module_rel_path) = raw.split_once('/')?;
+    if library_name.trim().is_empty() || module_rel_path.trim().is_empty() {
+        return None;
+    }
+    if module_rel_path.ends_with('/') {
+        return None;
+    }
+    Some((library_name, module_rel_path))
+}
+
+fn discover_library_root(project_root: &Path) -> Option<PathBuf> {
+    if let Ok(configured) = std::env::var(LIBRARY_ROOT_ENV) {
+        if !configured.trim().is_empty() {
+            let configured_path = PathBuf::from(configured);
+            if let Ok(existing) = canonicalize_existing(&configured_path) {
+                return Some(existing);
+            }
+        }
+    }
+
+    let mut candidates = Vec::new();
+    candidates.push(project_root.join("fl-libraries"));
+    if let Some(parent) = project_root.parent() {
+        candidates.push(parent.join("fl-libraries"));
+    }
+
+    let home_dir = std::env::var("USERPROFILE")
+        .ok()
+        .or_else(|| std::env::var("HOME").ok())
+        .map(PathBuf::from);
+    if let Some(home) = home_dir {
+        candidates.push(home.join("Documents").join("fl-libraries"));
+    }
+
+    for candidate in candidates {
+        if let Ok(existing) = canonicalize_existing(&candidate) {
+            return Some(existing);
+        }
+    }
+
+    None
 }
 
 fn path_to_string(path: &Path) -> String {
@@ -241,8 +323,20 @@ fn parse_parser_line_col(raw: &str) -> Option<(&str, usize, usize)> {
     Some((message, line, col))
 }
 
-fn compact_path(path: &str, root_dir: &Path) -> String {
+fn compact_path(path: &str, root_dir: &Path, library_root: Option<&Path>) -> String {
     let candidate = PathBuf::from(path);
+
+    if let Some(lib_root) = library_root {
+        if let Ok(relative) = candidate.strip_prefix(lib_root) {
+            let rendered = path_to_string(relative);
+            if !rendered.is_empty() {
+                if let Some((library_name, module_rel_path)) = rendered.split_once('/') {
+                    return format!("{LIBRARY_SCHEME}{library_name}/{module_rel_path}");
+                }
+            }
+        }
+    }
+
     if let Ok(relative) = candidate.strip_prefix(root_dir) {
         let rendered = path_to_string(relative);
         if !rendered.is_empty() {
@@ -387,6 +481,80 @@ component App() { <Page/> }
         assert!(
             err.contains("main.fm:2:1"),
             "line/col should be included: {err}"
+        );
+    }
+
+    #[test]
+    fn resolve_supports_library_import_uri_from_project_library_root() {
+        let workspace = TempWorkspace::new("formo_resolver_library_uri");
+        write_file(
+            &workspace.root,
+            "main.fm",
+            r#"import "lib://matimatika/core.fm" as Math;
+component App() {
+  <MathCard/>
+}
+"#,
+        );
+        write_file(
+            &workspace.root,
+            "fl-libraries/matimatika/core.fm",
+            r#"component MathCard() {
+  <Page/>
+}
+"#,
+        );
+
+        let main_path = workspace.root.join("main.fm");
+        let source = fs::read_to_string(&main_path).expect("main.fm exists");
+        let ast = parse(&source).expect("parse root ok");
+        let resolved = resolve(ast, main_path.to_str().expect("path should be utf8"))
+            .expect("library import uri should resolve");
+
+        assert_eq!(resolved.ast.components.len(), 2);
+        assert!(resolved
+            .modules
+            .iter()
+            .any(|module| module.ends_with("/main.fm")));
+        assert!(resolved
+            .modules
+            .iter()
+            .any(|module| module.contains("/fl-libraries/matimatika/core.fm")));
+    }
+
+    #[test]
+    fn resolve_tracks_library_style_modules() {
+        let workspace = TempWorkspace::new("formo_resolver_library_style_uri");
+        write_file(
+            &workspace.root,
+            "main.fm",
+            r#"import "lib://matimatika/theme.fs" as MathTheme;
+component App() {
+  <Page/>
+}
+"#,
+        );
+        write_file(
+            &workspace.root,
+            "fl-libraries/matimatika/theme.fs",
+            r#"style AppRoot {
+  color: #112233;
+}
+"#,
+        );
+
+        let main_path = workspace.root.join("main.fm");
+        let source = fs::read_to_string(&main_path).expect("main.fm exists");
+        let ast = parse(&source).expect("parse root ok");
+        let resolved = resolve(ast, main_path.to_str().expect("path should be utf8"))
+            .expect("library style import uri should resolve");
+
+        assert_eq!(resolved.modules.len(), 1);
+        assert_eq!(resolved.style_modules.len(), 1);
+        assert!(
+            resolved.style_modules[0].contains("/fl-libraries/matimatika/theme.fs"),
+            "unexpected style module path: {}",
+            resolved.style_modules[0]
         );
     }
 }

@@ -1,4 +1,11 @@
-# Referensi Bahasa Formo (`.fm`)
+﻿# Referensi Bahasa Formo (`.fm`)
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/01-formo-language-reference.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Dokumen ini menjelaskan syntax dan aturan semantik bahasa Formo berdasarkan implementasi saat ini.
 
@@ -274,3 +281,4 @@ Jika `HeaderFrame` tidak memiliki `<Slot/>`, inline children akan ditolak.
 3. Pisahkan komponen per fitur/per halaman.
 4. Gunakan `For` untuk list, `If` untuk conditional, jangan branch manual di luar DSL.
 5. Gunakan style ref konsisten (tanpa hardcode visual di banyak node).
+

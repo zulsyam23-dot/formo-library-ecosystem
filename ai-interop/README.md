@@ -1,20 +1,46 @@
 # Library: ai-interop
 
-## Tanggung jawab
+`ai-interop` adalah lapisan kontrak untuk integrasi AI di ekosistem Formo.
 
-- Menyediakan format kontrak yang mudah dikonsumsi AI (registry, schema, profile).
-- Menjaga konsistensi istilah domain agar prompt/tool AI tidak ambigu.
+## Apa yang Ditangani
 
-## Input/Output
+- capability profile machine-readable
+- normalized error envelope
+- interop convention lintas library
 
-- Input: metadata dari language/runtime/tooling.
-- Output: dokumen kontrak AI-native, indeks capability, dan profile integrasi.
+## Apa yang Tidak Ditangani
 
-## Status
+- compile pipeline `.fm/.fs/.fl`
+- runtime web/desktop execution
+- command orchestration CLI
 
-- `bootstrap` (kerangka sudah disiapkan, implementasi adapter menyusul).
+## Status dan Capability
 
-## Artefak migrasi fitur
+- status kontrak: `bootstrap`
+- capability utama:
+  - `capability_profile`
+  - `normalized_error_envelope`
+  - `machine_readable_registry`
+
+Sumber: `contracts/CAPABILITIES.json`.
+
+## Input dan Output
+
+- input:
+  - `registry metadata`
+  - `diagnostic payloads`
+  - `library capability declarations`
+- output:
+  - `ai capability profile`
+  - `normalized error envelope`
+  - `interop conventions`
+
+## Mapping Implementasi
+
+- belum ada crate Rust (`maps_to_crates` kosong)
+- fokus saat ini pada kontrak + konvensi integrasi
+
+## Artefak Dokumentasi
 
 - `docs/FEATURES.md`
 - `contracts/CAPABILITIES.json`

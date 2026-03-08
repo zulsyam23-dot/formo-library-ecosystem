@@ -1,4 +1,11 @@
-# Features: knowledge-pack
+﻿# Features: knowledge-pack
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/FEATURES.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Daftar fitur knowledge pack dokumentasi Formo yang wajib tersedia.
 
@@ -28,8 +35,11 @@ Daftar fitur knowledge pack dokumentasi Formo yang wajib tersedia.
     - Blueprint struktur project untuk skala kecil, menengah, dan besar.
 12. `quality_gates_reference`
     - Standar quality gate dan checklist CI/CD berbasis command Formo.
+13. `integration_checklist`
+    - Checklist integrasi lintas tahap (struktur project, validasi, build, dan release).
 
 ## Catatan
 
 - Knowledge pack ini diposisikan sebagai sumber dokumentasi operasional untuk manusia dan AI.
 - Fokus utama: akurasi implementasi saat ini + langkah praktis yang bisa langsung dijalankan.
+

@@ -1,4 +1,11 @@
-# Docs: Formo Complete Knowledge Pack
+﻿# Docs: Formo Complete Knowledge Pack
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/README.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Dokumentasi ini disusun sebagai manual lengkap penggunaan:
 
@@ -42,5 +49,7 @@ Dokumentasi ini disusun sebagai manual lengkap penggunaan:
 ## Prinsip Penulisan
 
 - Contoh selalu runnable (mengikuti fitur yang ada di kode).
+- Command ditulis dalam bentuk runnable penuh (`cargo run -p formo-cli -- ...`) untuk menghindari ambiguitas parsing AI.
 - Istilah konsisten dengan implementasi (`check`, `diagnose`, `build`, `doctor`, `bench`).
 - Fokus pada akurasi teknis dan langkah praktis.
+

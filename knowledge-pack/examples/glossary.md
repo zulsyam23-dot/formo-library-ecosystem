@@ -1,4 +1,11 @@
-# Formo Glossary
+﻿# Formo Glossary
+
+## AI Quick Context
+- doc_path: knowledge-pack/examples/glossary.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 - `FM`: file source bahasa Formo (`.fm`).
 - `FS`: file style Formo (`.fs`).
@@ -21,3 +28,4 @@
 - `Parity warning`: warning gap support style/widget di backend desktop (`W7601`, `W7602`).
 - `Doctor`: command pemeriksaan health environment + status pipeline.
 - `Diagnose`: command diagnosis detail termasuk statistik dan mode JSON/LSP.
+

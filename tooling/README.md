@@ -1,25 +1,63 @@
 # Library: tooling
 
-## Tanggung jawab
+`tooling` adalah orchestration layer CLI untuk seluruh pipeline Formo.
 
-- Menyediakan command CLI (`check`, `diagnose`, `build`, `bench`, `watch`, dll).
-- Menjadi orchestrator pipeline lintas library.
+## Apa yang Ditangani
 
-## Input/Output
+- command validasi: `check`, `diagnose`, `doctor`
+- command logic: `logic` untuk `.fl`
+- command output: `build` (web/desktop/multi)
+- command quality: `fmt`, `bench`
+- mode `watch` dan payload `lsp`
 
-- Input: entry file `.fm` + opsi CLI.
-- Output: diagnostic, artifact build, dan laporan benchmark.
+## Apa yang Tidak Ditangani
 
-## Batas domain
+- implementasi parser/typer/style compiler inti
+- implementasi runtime backend web/desktop
 
-- Tidak boleh menduplikasi implementasi parser/typer/style.
-- Fokus sebagai orchestration layer.
+## Status dan Capability
 
-## Mapping implementasi saat ini
+- status kontrak: `active`
+- capability utama:
+  - `check_diagnose_commands`
+  - `build_multi_target`
+  - `watch_mode`
+  - `benchmark_mode`
+  - `lsp_output`
+  - `optional_backend_features`
+
+Sumber: `contracts/CAPABILITIES.json`.
+
+## Input dan Output
+
+- input:
+  - `entry fm path`
+  - `cli command and flags`
+- output:
+  - `diagnostic output`
+  - `build artifacts`
+  - `benchmark reports`
+  - `lsp diagnostics payload`
+
+## Mapping Implementasi
 
 - `programs/formo-cli`
 
-## Artefak migrasi fitur
+## Quick Start
+
+```bash
+cargo run -p formo-cli -- check --input main.fm
+cargo run -p formo-cli -- diagnose --input main.fm --json-pretty
+cargo run -p formo-cli -- build --target multi --input main.fm --out dist
+```
+
+## Validasi Cepat
+
+```bash
+cargo test -p formo-cli
+```
+
+## Artefak Dokumentasi
 
 - `docs/FEATURES.md`
 - `contracts/CAPABILITIES.json`

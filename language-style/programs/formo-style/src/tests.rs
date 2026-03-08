@@ -283,3 +283,33 @@ style HeaderCard:title {
 }"##;
     assert_eq!(snapshot_first, expected);
 }
+
+#[test]
+fn compile_styles_supports_library_style_import_uri() {
+    let workspace = TempWorkspace::new("formo_style_library_uri");
+    write_file(
+        &workspace.root,
+        "main.fm",
+        r#"import "lib://matimatika/base.fs" as MathBase;
+
+component App() {
+  <Page>
+    <Text value="Halo" style=MathText/>
+  </Page>
+}
+"#,
+    );
+
+    write_file(
+        &workspace.root,
+        "fl-libraries/matimatika/base.fs",
+        r#"style MathText {
+  color: #224466;
+}
+"#,
+    );
+
+    let styled = compile_project_styles(&workspace.root, "main.fm");
+    assert_eq!(styled.styles.len(), 1);
+    assert_eq!(styled.styles[0].id, "MathText");
+}

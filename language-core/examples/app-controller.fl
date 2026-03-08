@@ -1,0 +1,28 @@
+module AppController;
+
+use "../examples/session-service.fl" as SessionService;
+use "../examples/desktop-adapter.fl" as DesktopAdapter;
+use "../examples/web-adapter.fl" as WebAdapter;
+
+logic AppController {
+  enum StartupMode { Safe, Normal, Fast }
+  struct StartupState { routeName: String, retries: Int }
+  type RouteName = navigation.Route;
+
+  function pickInitialRoute(mode: StartupMode, hasSession: Bool) -> String {
+    return mode;
+  }
+
+  event startApp {
+    action call SessionService.bootstrap;
+    try {
+      action call Runtime.trace;
+      action throw "STARTUP_RETRY";
+    }
+    catch {
+      action emit "STARTUP_RECOVERED";
+    }
+    platform desktop { action call DesktopAdapter.focusMainWindow; }
+    platform web { action call WebAdapter.syncBrowserRoute; }
+  }
+}

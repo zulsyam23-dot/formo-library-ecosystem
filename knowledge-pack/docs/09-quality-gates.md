@@ -1,28 +1,35 @@
-# Quality Gates Formo (CI/CD Ready)
+﻿# Quality Gates Formo (CI/CD Ready)
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/09-quality-gates.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Dokumen ini mendefinisikan quality gate minimal agar proyek Formo stabil di pengembangan harian dan rilis.
 
 ## 1) Gate Wajib Sebelum Merge
 
 1. Format gate:
-   - `fmt --check` harus lulus.
+   - `cargo run -p formo-cli -- fmt --input main.fm --check` harus lulus.
 2. Syntax + semantic gate:
-   - `check --json` harus lulus.
+   - `cargo run -p formo-cli -- check --input main.fm --json` harus lulus.
 3. Diagnostic gate:
-   - `diagnose --json` tidak boleh gagal.
+   - `cargo run -p formo-cli -- diagnose --input main.fm --json` tidak boleh gagal.
 4. Build gate:
-   - minimal `build --target web` atau sesuai target produk.
+   - minimal `cargo run -p formo-cli -- build --target web --input main.fm --out dist-web` atau sesuai target produk.
 5. Jika desktop didukung:
-   - `build --target desktop`.
+   - `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop`.
    - review parity warning.
 
 ## 2) Gate Rekomendasi untuk Release
 
-1. `build --target multi --prod`.
+1. `cargo run -p formo-cli -- build --target multi --input main.fm --out dist --prod`.
 2. desktop executable release:
-   - `build --target desktop --release-exe`.
+   - `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --release-exe`.
 3. benchmark:
-   - `bench` dengan budget p95 compile + first render.
+   - `cargo run -p formo-cli -- bench --input main.fm --iterations 20 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --max-compile-p95-ms 80 --max-first-render-p95-ms 60` dengan budget p95 compile + first render.
 4. validasi artifact layout final.
 
 ## 3) Contoh Pipeline Command
@@ -76,7 +83,8 @@ Release candidate diterima jika:
 
 Simpan:
 
-1. output JSON `check`/`diagnose`.
+1. output JSON dari `cargo run -p formo-cli -- check --input main.fm --json` dan `cargo run -p formo-cli -- diagnose --input main.fm --json`.
 2. laporan benchmark JSON.
 3. checksum atau daftar artifact build.
 4. changelog singkat per release.
+

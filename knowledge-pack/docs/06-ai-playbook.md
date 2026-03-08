@@ -1,4 +1,11 @@
-# AI Playbook untuk Formo
+﻿# AI Playbook untuk Formo
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/06-ai-playbook.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Dokumen ini merinci cara paling efektif menggunakan AI untuk menulis, mereview, dan memelihara project Formo.
 
@@ -101,11 +108,11 @@ Utamakan property core dan beri fallback bila perlu.
 
 ```text
 Rancang pipeline CI Formo:
-- fmt check
-- check json
-- diagnose json
-- build multi
-- bench budget
+- cargo run -p formo-cli -- fmt --input main.fm --check
+- cargo run -p formo-cli -- check --input main.fm --json
+- cargo run -p formo-cli -- diagnose --input main.fm --json
+- cargo run -p formo-cli -- build --target multi --input main.fm --out dist --prod
+- cargo run -p formo-cli -- bench --input main.fm --iterations 20 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --max-compile-p95-ms 80 --max-first-render-p95-ms 60
 
 Berikan script command dan kriteria gagal.
 ```
@@ -143,3 +150,4 @@ Task dianggap selesai jika:
 2. command verifikasi sukses,
 3. dokumentasi terbarui jika ada kontrak/fitur baru,
 4. tidak ada warning kritikal yang diabaikan.
+

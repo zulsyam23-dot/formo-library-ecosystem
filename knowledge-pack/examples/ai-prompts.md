@@ -1,4 +1,11 @@
-# AI Prompt Templates untuk Formo
+﻿# AI Prompt Templates untuk Formo
+
+## AI Quick Context
+- doc_path: knowledge-pack/examples/ai-prompts.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 ## 1) Prompt Generate Fitur Baru
 
@@ -70,11 +77,11 @@ Target:
 
 ```text
 Buat checklist rilis Formo:
-- fmt check
-- check
-- diagnose json
-- build multi
-- build desktop release exe
+- cargo run -p formo-cli -- fmt --input main.fm --check
+- cargo run -p formo-cli -- check --input main.fm --json
+- cargo run -p formo-cli -- diagnose --input main.fm --json
+- cargo run -p formo-cli -- build --target multi --input main.fm --out dist --prod
+- cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --release-exe
 - validasi artifact
 ```
 
@@ -92,3 +99,4 @@ Output:
 2) asumsi/open question
 3) ringkasan perubahan yang disarankan
 ```
+

@@ -1,4 +1,11 @@
-# Quickstart Formo (End-to-End)
+﻿# Quickstart Formo (End-to-End)
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/00-quickstart.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Dokumen ini untuk memulai cepat dan benar, dari nol sampai artifact web/desktop berhasil dibuat.
 
@@ -137,10 +144,10 @@ Cocok saat iterasi harian.
 
 ## 11) Workflow Harian yang Direkomendasikan
 
-1. `fmt --check` sebelum commit.
-2. `check` untuk validasi cepat.
-3. `diagnose --json` untuk integrasi tooling.
-4. `build --target web|desktop|multi`.
+1. `cargo run -p formo-cli -- fmt --input main.fm --check` sebelum commit.
+2. `cargo run -p formo-cli -- check --input main.fm` untuk validasi cepat.
+3. `cargo run -p formo-cli -- diagnose --input main.fm --json` untuk integrasi tooling.
+4. `cargo run -p formo-cli -- build --target <web|desktop|multi> --input main.fm --out <output-dir>`.
 5. desktop: pantau parity warning di hasil build.
 
 ## 12) Checklist Selesai Quickstart
@@ -150,3 +157,4 @@ Cocok saat iterasi harian.
 - Build web menghasilkan artifact.
 - Build desktop menghasilkan `native-app`.
 - Opsi `--release-exe` berhasil menghasilkan binary release.
+

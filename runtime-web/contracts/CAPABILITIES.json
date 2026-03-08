@@ -8,7 +8,9 @@
   "outputs": [
     "index.html",
     "app.css",
-    "app.js"
+    "app.js",
+    "runtime/README.md",
+    "runtime/app/*.js"
   ],
   "capabilities": [
     "web_artifact_emit",

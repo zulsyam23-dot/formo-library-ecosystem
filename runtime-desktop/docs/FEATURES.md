@@ -31,6 +31,10 @@ Daftar fitur runtime desktop Formo yang wajib tersedia di library ini.
    - Tambahkan warning parity desktop ke `app.native.json.diagnostics` untuk:
      - style property yang belum didukung penuh
      - widget yang masih fallback renderer
+9. `desktop_readable_artifacts`
+   - Emit snapshot terpecah untuk audit/readability:
+     - `readable/native/components.json`, `readable/native/tokens.json`, `readable/native/diagnostics.json`
+     - `readable/ir/components.json`, `readable/ir/nodes.json`, `readable/ir/styles.json`, `readable/ir/tokens.json`, `readable/ir/diagnostics.json`
 
 ## Mapping Implementasi
 

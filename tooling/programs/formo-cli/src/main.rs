@@ -15,7 +15,7 @@ mod watch;
 
 use args::{
     parse_benchmark_args, parse_build_args, parse_check_args, parse_doctor_args, parse_fmt_args,
-    parse_lsp_args, print_help,
+    parse_logic_args, parse_lsp_args, print_help,
 };
 use error::CliError;
 use json_output::{
@@ -25,6 +25,7 @@ use json_output::{
 use pipeline::pipeline;
 use serde_json::json;
 use std::env;
+use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -46,6 +47,7 @@ fn run() -> Result<(), CliError> {
 
     match args[1].as_str() {
         "check" => run_check(&args[2..]),
+        "logic" => run_logic(&args[2..]),
         "diagnose" => {
             let check_args = parse_check_args(&args[2..])?;
             if check_args.watch {
@@ -79,6 +81,184 @@ fn run() -> Result<(), CliError> {
         }
         cmd => Err(CliError::new(format!("unknown command: {cmd}"))),
     }
+}
+
+fn run_logic(raw_args: &[String]) -> Result<(), CliError> {
+    let logic_args = parse_logic_args(raw_args)?;
+    let source = fs::read_to_string(&logic_args.input).map_err(|err| {
+        CliError::new(format!(
+            "cannot read logic input `{}`: {err}",
+            logic_args.input
+        ))
+    })?;
+
+    match formo_logic::parse(&source) {
+        Ok(program) => {
+            let contract = formo_logic::runtime_contract(&program);
+            let parity_ready_units = contract
+                .units
+                .iter()
+                .filter(|unit| unit.parity_ready)
+                .count();
+            let parity_score = if contract.units.is_empty() {
+                100.0
+            } else {
+                (parity_ready_units as f64 / contract.units.len() as f64) * 100.0
+            };
+            let mut event_count = 0usize;
+            let mut symmetric_event_count = 0usize;
+            let mut global_core_event_count = 0usize;
+
+            let units = contract
+                .units
+                .iter()
+                .map(|unit| {
+                    let events = unit
+                        .events
+                        .iter()
+                        .map(|event| {
+                            event_count += 1;
+                            let has_global_core = !event.global_calls.is_empty()
+                                || event.set_count > 0
+                                || event.emit_count > 0;
+                            if has_global_core {
+                                global_core_event_count += 1;
+                            }
+                            let symmetric_platform_calls = (event.web_calls.is_empty()
+                                && event.desktop_calls.is_empty())
+                                || (!event.web_calls.is_empty()
+                                    && !event.desktop_calls.is_empty()
+                                    && event.web_calls.len() == event.desktop_calls.len());
+                            if symmetric_platform_calls {
+                                symmetric_event_count += 1;
+                            }
+                            json!({
+                                "name": event.name,
+                                "totalActions": event.total_actions,
+                                "setCount": event.set_count,
+                                "emitCount": event.emit_count,
+                                "throwCount": event.throw_count,
+                                "breakCount": event.break_count,
+                                "continueCount": event.continue_count,
+                                "returnCount": event.return_count,
+                                "ifCount": event.if_count,
+                                "forCount": event.for_count,
+                                "whileCount": event.while_count,
+                                "matchCount": event.match_count,
+                                "tryCount": event.try_count,
+                                "catchCount": event.catch_count,
+                                "globalCalls": event.global_calls,
+                                "webCalls": event.web_calls,
+                                "desktopCalls": event.desktop_calls,
+                            })
+                        })
+                        .collect::<Vec<_>>();
+                    json!({
+                        "kind": unit.kind,
+                        "name": unit.name,
+                        "parityReady": unit.parity_ready,
+                        "stateFieldCount": unit.state_field_count,
+                        "typedStateFieldCount": unit.typed_state_field_count,
+                        "functionCount": unit.function_count,
+                        "typedFunctionCount": unit.typed_function_count,
+                        "returningFunctionCount": unit.returning_function_count,
+                        "enumCount": unit.enum_count,
+                        "enumVariantCount": unit.enum_variant_count,
+                        "structCount": unit.struct_count,
+                        "typedStructCount": unit.typed_struct_count,
+                        "structFieldCount": unit.struct_field_count,
+                        "typeAliasCount": unit.type_alias_count,
+                        "qualifiedTypeAliasCount": unit.qualified_type_alias_count,
+                        "eventCount": unit.events.len(),
+                        "events": events,
+                    })
+                })
+                .collect::<Vec<_>>();
+            let event_parity_score = if event_count == 0 {
+                100.0
+            } else {
+                (symmetric_event_count as f64 / event_count as f64) * 100.0
+            };
+
+            let payload = json!({
+                "ok": true,
+                "input": logic_args.input,
+                "module": contract.module,
+                "useCount": program.uses.len(),
+                "unitCount": contract.units.len(),
+                "quality": {
+                    "parityReadyUnits": parity_ready_units,
+                    "parityScore": parity_score,
+                    "eventCount": event_count,
+                    "symmetricEventCount": symmetric_event_count,
+                    "globalCoreEventCount": global_core_event_count,
+                    "eventParityScore": event_parity_score,
+                },
+                "runtimeContract": {
+                    "units": units,
+                }
+            });
+
+            if let Some(manifest_out) = logic_args.rt_manifest_out.as_ref() {
+                write_json_manifest(manifest_out, &payload)?;
+            }
+
+            if logic_args.json {
+                emit_json(&payload, logic_args.json_pretty)?;
+            } else {
+                println!(
+                    "logic check passed: {} (module={}, units={}, parityReady={}/{}, parityScore={:.2}%)",
+                    logic_args.input,
+                    contract.module,
+                    contract.units.len(),
+                    parity_ready_units,
+                    contract.units.len(),
+                    parity_score
+                );
+                if let Some(manifest_out) = logic_args.rt_manifest_out.as_ref() {
+                    println!("runtime manifest written: {manifest_out}");
+                }
+            }
+            Ok(())
+        }
+        Err(err) => {
+            if logic_args.json {
+                let payload = json!({
+                    "ok": false,
+                    "input": logic_args.input,
+                    "stage": "logic-parser",
+                    "error": err,
+                });
+                emit_json(&payload, logic_args.json_pretty)?;
+                Err(CliError::printed("logic parse failed"))
+            } else {
+                Err(CliError::new(err))
+            }
+        }
+    }
+}
+
+fn write_json_manifest(path: &str, payload: &serde_json::Value) -> Result<(), CliError> {
+    let text = serde_json::to_string_pretty(payload)
+        .map_err(|err| CliError::new(format!("cannot serialize runtime manifest: {err}")))?;
+    let manifest_path = PathBuf::from(path);
+    if let Some(parent) = manifest_path.parent() {
+        if !parent.as_os_str().is_empty() {
+            fs::create_dir_all(parent).map_err(|err| {
+                CliError::new(format!(
+                    "cannot create runtime manifest directory {}: {err}",
+                    parent.display()
+                ))
+            })?;
+        }
+    }
+    fs::write(&manifest_path, text).map_err(|err| {
+        CliError::new(format!(
+            "cannot write runtime manifest {}: {err}",
+            manifest_path.display()
+        ))
+    })?;
+    Ok(())
 }
 
 fn run_check(raw_args: &[String]) -> Result<(), CliError> {
@@ -152,6 +332,11 @@ fn run_build_once(build_args: &args::BuildArgs) -> Result<(), CliError> {
             "`--release-exe` only supports `desktop` or `multi` target",
         ));
     }
+    if build_args.strict_parity && build_args.target == "web" {
+        return Err(CliError::new(
+            "`--strict-parity` requires target `desktop` or `multi`",
+        ));
+    }
 
     let ir = pipeline(&build_args.input)?;
     let report = output::emit_target(
@@ -177,9 +362,22 @@ fn run_build_once(build_args: &args::BuildArgs) -> Result<(), CliError> {
             report.desktop_style_warning_count,
             report.desktop_widget_warning_count
         );
-        if let Some(path) = report.desktop_parity_diagnostics_path {
+        if let Some(ref path) = report.desktop_parity_diagnostics_path {
             println!("desktop parity details: {path}");
         }
+    }
+
+    if build_args.strict_parity && report.desktop_parity_warning_count > 0 {
+        let detail_path = report
+            .desktop_parity_diagnostics_path
+            .unwrap_or_else(|| "<unknown>".to_string());
+        return Err(CliError::new(format!(
+            "E7600 strict parity failed: {} desktop parity warning(s) detected (style={}, widget={}); details: {}",
+            report.desktop_parity_warning_count,
+            report.desktop_style_warning_count,
+            report.desktop_widget_warning_count,
+            detail_path
+        )));
     }
 
     if build_args.release_exe {

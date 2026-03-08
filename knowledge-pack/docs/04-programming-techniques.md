@@ -1,4 +1,11 @@
-# Teknik Pemrograman Formo (Basic sampai Advanced)
+﻿# Teknik Pemrograman Formo (Basic sampai Advanced)
+
+## AI Quick Context
+- doc_path: knowledge-pack/docs/04-programming-techniques.md
+- intent: dokumentasi operasional Formo dengan format deterministik untuk AI agent.
+- command_prefix: cargo run -p formo-cli --
+- default_input: main.fm (kecuali disebut lain).
+
 
 Dokumen ini merangkum berbagai teknik implementasi agar codebase Formo rapi, scalable, dan stabil lintas target.
 
@@ -175,10 +182,10 @@ Manfaat:
 
 Urutan:
 
-1. Jalankan `fmt --check`.
-2. Jalankan `check`.
-3. Jalankan `diagnose --json`.
-4. Jalankan `build --target multi`.
+1. Jalankan `cargo run -p formo-cli -- fmt --input main.fm --check`.
+2. Jalankan `cargo run -p formo-cli -- check --input main.fm`.
+3. Jalankan `cargo run -p formo-cli -- diagnose --input main.fm --json`.
+4. Jalankan `cargo run -p formo-cli -- build --target multi --input main.fm --out dist`.
 5. Untuk desktop, cek parity warning.
 
 ## 11) Teknik Integrasi AI Pair Programmer
@@ -187,8 +194,8 @@ Gunakan pola kerja:
 
 1. beri AI konteks file aktif + target fitur.
 2. minta AI menulis patch kecil per langkah.
-3. validasi setiap langkah dengan `check`.
-4. finalisasi dengan `build` dan `diagnose`.
+3. validasi setiap langkah dengan `cargo run -p formo-cli -- check --input main.fm`.
+4. finalisasi dengan `cargo run -p formo-cli -- build --target multi --input main.fm --out dist` dan `cargo run -p formo-cli -- diagnose --input main.fm --json`.
 
 ## 12) Anti-Pattern yang Harus Dihindari
 
@@ -197,3 +204,4 @@ Gunakan pola kerja:
 3. Memaksa prop type (misal string untuk prop int).
 4. Menaruh logic slot tanpa benar-benar menyediakan `<Slot/>`.
 5. Mengabaikan warning parity desktop.
+

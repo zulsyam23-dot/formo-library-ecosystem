@@ -20,7 +20,16 @@
     "native-app/src/render/media.rs",
     "native-app/src/render/shared.rs",
     "native-app/src/render/state.rs",
-    "native-app/README.md"
+    "native-app/README.md",
+    "readable/README.md",
+    "readable/native/components.json",
+    "readable/native/tokens.json",
+    "readable/native/diagnostics.json",
+    "readable/ir/components.json",
+    "readable/ir/nodes.json",
+    "readable/ir/styles.json",
+    "readable/ir/tokens.json",
+    "readable/ir/diagnostics.json"
   ],
   "capabilities": [
     "desktop_native_bundle_emit",
@@ -30,7 +39,8 @@
     "desktop_host_actions",
     "desktop_state_bridge",
     "ir_snapshot_emit",
-    "desktop_parity_diagnostics"
+    "desktop_parity_diagnostics",
+    "desktop_readable_artifacts"
   ],
   "maps_to_crates": [
     "programs/formo-backend-desktop"
