@@ -25,6 +25,8 @@ use json_output::{
 use pipeline::pipeline;
 use serde_json::json;
 use std::env;
+use std::path::PathBuf;
+use std::process::Command;
 
 fn main() {
     if let Err(err) = run() {
@@ -145,8 +147,14 @@ fn run_build(raw_args: &[String]) -> Result<(), CliError> {
 }
 
 fn run_build_once(build_args: &args::BuildArgs) -> Result<(), CliError> {
+    if build_args.release_exe && build_args.target == "web" {
+        return Err(CliError::new(
+            "`--release-exe` only supports `desktop` or `multi` target",
+        ));
+    }
+
     let ir = pipeline(&build_args.input)?;
-    output::emit_target(
+    let report = output::emit_target(
         &ir,
         &build_args.target,
         &build_args.out_dir,
@@ -161,5 +169,88 @@ fn run_build_once(build_args: &args::BuildArgs) -> Result<(), CliError> {
         "build ok: target={} out={} mode={}",
         build_args.target, build_args.out_dir, mode
     );
+
+    if report.desktop_parity_warning_count > 0 {
+        println!(
+            "desktop parity warnings: total={} style={} widget={}",
+            report.desktop_parity_warning_count,
+            report.desktop_style_warning_count,
+            report.desktop_widget_warning_count
+        );
+        if let Some(path) = report.desktop_parity_diagnostics_path {
+            println!("desktop parity details: {path}");
+        }
+    }
+
+    if build_args.release_exe {
+        build_native_release_executable(&build_args.target, &build_args.out_dir)?;
+    }
+
     Ok(())
+}
+
+fn build_native_release_executable(target: &str, out_dir: &str) -> Result<(), CliError> {
+    match target {
+        "desktop" => {
+            let native_app_dir = PathBuf::from(out_dir).join("native-app");
+            run_cargo_release_build(&native_app_dir)?;
+            print_release_binary_hint(&native_app_dir);
+            Ok(())
+        }
+        "multi" => {
+            let native_app_dir = PathBuf::from(out_dir).join("desktop").join("native-app");
+            run_cargo_release_build(&native_app_dir)?;
+            print_release_binary_hint(&native_app_dir);
+            Ok(())
+        }
+        _ => Ok(()),
+    }
+}
+
+fn run_cargo_release_build(native_app_dir: &PathBuf) -> Result<(), CliError> {
+    if !native_app_dir.exists() {
+        return Err(CliError::new(format!(
+            "native app directory not found: {}",
+            native_app_dir.display()
+        )));
+    }
+
+    let status = Command::new("cargo")
+        .arg("build")
+        .arg("--release")
+        .current_dir(native_app_dir)
+        .status()
+        .map_err(|err| {
+            CliError::new(format!(
+                "failed to run `cargo build --release` in {}: {err}",
+                native_app_dir.display()
+            ))
+        })?;
+
+    if !status.success() {
+        return Err(CliError::new(format!(
+            "`cargo build --release` failed in {}",
+            native_app_dir.display()
+        )));
+    }
+
+    Ok(())
+}
+
+fn print_release_binary_hint(native_app_dir: &PathBuf) {
+    let release_dir = native_app_dir.join("target").join("release");
+    #[cfg(target_os = "windows")]
+    {
+        println!(
+            "native release executable generated under: {} (*.exe)",
+            release_dir.display()
+        );
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        println!(
+            "native release executable generated under: {}",
+            release_dir.display()
+        );
+    }
 }

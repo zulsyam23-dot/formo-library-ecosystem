@@ -44,8 +44,11 @@ fn compile_project_styles(root: &Path, entry: &str) -> StyledProgram {
     let entry_path = root.join(entry);
     let source = fs::read_to_string(&entry_path).expect("entry source should exist");
     let ast = parse(&source).expect("parser should succeed");
-    let resolved = resolve(ast, entry_path.to_str().expect("entry path should be utf-8"))
-        .expect("resolver should succeed");
+    let resolved = resolve(
+        ast,
+        entry_path.to_str().expect("entry path should be utf-8"),
+    )
+    .expect("resolver should succeed");
     let typed = type_check(resolved).expect("type-check should succeed");
     compile_styles(typed).expect("style compilation should succeed")
 }
@@ -128,8 +131,8 @@ style Heading {
   color: token(color.primary);
 }
 "#;
-    let err =
-        parse_style_module(src, "test.fs", &BTreeMap::new()).expect_err("unknown token should fail");
+    let err = parse_style_module(src, "test.fs", &BTreeMap::new())
+        .expect_err("unknown token should fail");
     assert!(
         err.contains("unknown token `color.primary`"),
         "unexpected error: {err}"

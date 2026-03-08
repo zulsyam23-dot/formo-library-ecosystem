@@ -2,21 +2,40 @@ use formo_ir::IrProgram;
 use std::fs;
 use std::path::Path;
 
-#[cfg(any(feature = "backend-web", feature = "backend-desktop"))]
-use formo_ir::Backend;
-#[cfg(any(feature = "backend-web", feature = "backend-desktop"))]
-use formo_ir::BackendOutput;
 #[cfg(feature = "backend-desktop")]
 use formo_backend_desktop::DesktopBackend;
 #[cfg(feature = "backend-web")]
 use formo_backend_web::WebBackend;
+#[cfg(any(feature = "backend-web", feature = "backend-desktop"))]
+use formo_ir::Backend;
+#[cfg(any(feature = "backend-web", feature = "backend-desktop"))]
+use formo_ir::BackendOutput;
+
+#[derive(Debug, Clone, Default)]
+pub struct EmitReport {
+    pub desktop_parity_warning_count: usize,
+    pub desktop_style_warning_count: usize,
+    pub desktop_widget_warning_count: usize,
+    pub desktop_parity_diagnostics_path: Option<String>,
+}
+
+impl EmitReport {
+    fn merge(&mut self, other: Self) {
+        self.desktop_parity_warning_count += other.desktop_parity_warning_count;
+        self.desktop_style_warning_count += other.desktop_style_warning_count;
+        self.desktop_widget_warning_count += other.desktop_widget_warning_count;
+        if self.desktop_parity_diagnostics_path.is_none() {
+            self.desktop_parity_diagnostics_path = other.desktop_parity_diagnostics_path;
+        }
+    }
+}
 
 pub fn emit_target(
     ir: &IrProgram,
     target: &str,
     out_dir: &str,
     production: bool,
-) -> Result<(), String> {
+) -> Result<EmitReport, String> {
     if !Path::new(out_dir).exists() {
         fs::create_dir_all(out_dir).map_err(|e| format!("cannot create {out_dir}: {e}"))?;
     }
@@ -25,38 +44,87 @@ pub fn emit_target(
         "web" => emit_web(ir, out_dir, production),
         "desktop" => emit_desktop(ir, out_dir),
         "multi" => {
-            emit_web(ir, &format!("{out_dir}/web"), production)?;
-            emit_desktop(ir, &format!("{out_dir}/desktop"))
+            let mut report = emit_web(ir, &format!("{out_dir}/web"), production)?;
+            report.merge(emit_desktop(ir, &format!("{out_dir}/desktop"))?);
+            Ok(report)
         }
         other => Err(format!("unsupported target: {other}")),
     }
 }
 
-fn emit_web(ir: &IrProgram, out_dir: &str, production: bool) -> Result<(), String> {
+fn emit_web(ir: &IrProgram, out_dir: &str, production: bool) -> Result<EmitReport, String> {
     #[cfg(feature = "backend-web")]
     {
-        return write_output(WebBackend.emit(ir)?, out_dir, production);
+        write_output(WebBackend.emit(ir)?, out_dir, production)?;
+        return Ok(EmitReport::default());
     }
     #[cfg(not(feature = "backend-web"))]
     {
         let _ = (ir, out_dir, production);
-        Err(
-            "target `web` unavailable: rebuild formo-cli with feature `backend-web`".to_string(),
-        )
+        Err("target `web` unavailable: rebuild formo-cli with feature `backend-web`".to_string())
     }
 }
 
-fn emit_desktop(ir: &IrProgram, out_dir: &str) -> Result<(), String> {
+fn emit_desktop(ir: &IrProgram, out_dir: &str) -> Result<EmitReport, String> {
     #[cfg(feature = "backend-desktop")]
     {
-        return write_output(DesktopBackend.emit(ir)?, out_dir, false);
+        let output = DesktopBackend.emit(ir)?;
+        let report = summarize_desktop_output(&output, out_dir);
+        write_output(output, out_dir, false)?;
+        return Ok(report);
     }
     #[cfg(not(feature = "backend-desktop"))]
     {
         let _ = (ir, out_dir);
-        Err("target `desktop` unavailable: rebuild formo-cli with feature `backend-desktop`"
-            .to_string())
+        Err(
+            "target `desktop` unavailable: rebuild formo-cli with feature `backend-desktop`"
+                .to_string(),
+        )
     }
+}
+
+#[cfg(feature = "backend-desktop")]
+fn summarize_desktop_output(output: &BackendOutput, out_dir: &str) -> EmitReport {
+    let mut report = EmitReport::default();
+
+    let Some(bundle) = output
+        .files
+        .iter()
+        .find(|file| file.path == "app.native.json")
+    else {
+        return report;
+    };
+
+    let parsed: serde_json::Value = match serde_json::from_str(&bundle.content) {
+        Ok(value) => value,
+        Err(_) => return report,
+    };
+
+    let Some(diagnostics) = parsed.get("diagnostics").and_then(|value| value.as_array()) else {
+        return report;
+    };
+
+    for diagnostic in diagnostics {
+        let Some(code) = diagnostic.get("code").and_then(|value| value.as_str()) else {
+            continue;
+        };
+        if !code.starts_with("W76") {
+            continue;
+        }
+
+        report.desktop_parity_warning_count += 1;
+        match code {
+            "W7601" => report.desktop_style_warning_count += 1,
+            "W7602" => report.desktop_widget_warning_count += 1,
+            _ => {}
+        }
+    }
+
+    if report.desktop_parity_warning_count > 0 {
+        report.desktop_parity_diagnostics_path = Some(format!("{out_dir}/app.native.json"));
+    }
+
+    report
 }
 
 #[cfg(any(feature = "backend-web", feature = "backend-desktop"))]
@@ -75,6 +143,12 @@ fn write_output(output: BackendOutput, out_dir: &str, production: bool) -> Resul
         }
 
         let full = format!("{out_dir}/{}", file.path);
+        if let Some(parent) = Path::new(&full).parent() {
+            if !parent.exists() {
+                fs::create_dir_all(parent)
+                    .map_err(|e| format!("cannot create {}: {e}", parent.display()))?;
+            }
+        }
         fs::write(&full, file.content).map_err(|e| format!("cannot write {full}: {e}"))?;
     }
 

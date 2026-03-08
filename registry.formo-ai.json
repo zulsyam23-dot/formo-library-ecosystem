@@ -60,7 +60,7 @@
       "name": "Formo Desktop Runtime",
       "folder": "runtime-desktop",
       "status": "active",
-      "purpose": "Desktop webview bundle and bridge based on Formo IR.",
+      "purpose": "Desktop native Rust bundle, runnable GUI scaffold, style parity core, and host bridge based on Formo IR.",
       "maps_to_crates": [
         "runtime-desktop/programs/formo-backend-desktop"
       ],

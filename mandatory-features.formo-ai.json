@@ -36,8 +36,10 @@
     {
       "library": "runtime-desktop",
       "features": [
-        "desktop_bundle_emit",
-        "desktop_bridge_actions",
+        "desktop_native_bundle_emit",
+        "desktop_native_scaffold_emit",
+        "desktop_style_parity_core",
+        "desktop_host_actions",
         "desktop_state_bridge",
         "ir_snapshot_emit"
       ]

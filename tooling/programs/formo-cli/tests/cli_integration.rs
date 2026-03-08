@@ -126,6 +126,30 @@ component App() {
     );
 }
 
+fn create_desktop_parity_gap_sample(root: &Path) {
+    write_file(
+        root,
+        "main.fm",
+        r#"import "styles/base.fs" as Base;
+
+component App() {
+  <Page>
+    <Text value="halo" style=GapStyle/>
+  </Page>
+}
+"#,
+    );
+
+    write_file(
+        root,
+        "styles/base.fs",
+        r#"style GapStyle {
+  position: absolute;
+}
+"#,
+    );
+}
+
 fn create_cycle_sample(root: &Path) {
     write_file(
         root,
@@ -844,7 +868,7 @@ fn build_web_multifile_project_generates_files() {
 }
 
 #[test]
-fn build_desktop_project_generates_bundle_and_ir() {
+fn build_desktop_project_generates_native_bundle_and_ir() {
     let workspace = TempWorkspace::new("formo_cli_build_desktop");
     create_multifile_sample(workspace.path());
 
@@ -869,27 +893,136 @@ fn build_desktop_project_generates_bundle_and_ir() {
     );
 
     assert!(
-        workspace.path().join("dist-desktop/index.html").exists(),
-        "expected dist-desktop/index.html to exist"
-    );
-    assert!(
-        workspace.path().join("dist-desktop/app.js").exists(),
-        "expected dist-desktop/app.js to exist"
-    );
-    assert!(
-        workspace.path().join("dist-desktop/app.css").exists(),
-        "expected dist-desktop/app.css to exist"
-    );
-    assert!(
         workspace
             .path()
-            .join("dist-desktop/desktop-bridge.js")
+            .join("dist-desktop/app.native.json")
             .exists(),
-        "expected dist-desktop/desktop-bridge.js to exist"
+        "expected dist-desktop/app.native.json to exist"
+    );
+    assert!(
+        workspace.path().join("dist-desktop/app.native.rs").exists(),
+        "expected dist-desktop/app.native.rs to exist"
+    );
+    assert!(
+        !workspace.path().join("dist-desktop/index.html").exists(),
+        "did not expect dist-desktop/index.html for native desktop target"
     );
     assert!(
         workspace.path().join("dist-desktop/app.ir.json").exists(),
         "expected dist-desktop/app.ir.json to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/Cargo.toml")
+            .exists(),
+        "expected dist-desktop/native-app/Cargo.toml to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/src/main.rs")
+            .exists(),
+        "expected dist-desktop/native-app/src/main.rs to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/src/app.rs")
+            .exists(),
+        "expected dist-desktop/native-app/src/app.rs to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/src/model.rs")
+            .exists(),
+        "expected dist-desktop/native-app/src/model.rs to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/src/style.rs")
+            .exists(),
+        "expected dist-desktop/native-app/src/style.rs to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/src/render/mod.rs")
+            .exists(),
+        "expected dist-desktop/native-app/src/render/mod.rs to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/src/render/flow.rs")
+            .exists(),
+        "expected dist-desktop/native-app/src/render/flow.rs to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/src/render/controls.rs")
+            .exists(),
+        "expected dist-desktop/native-app/src/render/controls.rs to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/src/render/media.rs")
+            .exists(),
+        "expected dist-desktop/native-app/src/render/media.rs to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/src/render/shared.rs")
+            .exists(),
+        "expected dist-desktop/native-app/src/render/shared.rs to exist"
+    );
+    assert!(
+        workspace
+            .path()
+            .join("dist-desktop/native-app/src/render/state.rs")
+            .exists(),
+        "expected dist-desktop/native-app/src/render/state.rs to exist"
+    );
+}
+
+#[test]
+fn build_desktop_reports_parity_warnings_in_stdout() {
+    let workspace = TempWorkspace::new("formo_cli_build_desktop_parity");
+    create_desktop_parity_gap_sample(workspace.path());
+
+    let output = Command::new(formo_bin())
+        .current_dir(workspace.path())
+        .args([
+            "build",
+            "--target",
+            "desktop",
+            "--input",
+            "main.fm",
+            "--out",
+            "dist-desktop",
+        ])
+        .output()
+        .expect("should run formo build desktop");
+
+    assert!(
+        output.status.success(),
+        "expected success, stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("desktop parity warnings: total=1 style=1 widget=0"),
+        "expected parity warning summary in stdout, got: {stdout}"
+    );
+    assert!(
+        stdout.contains("desktop parity details: dist-desktop/app.native.json"),
+        "expected parity diagnostics path in stdout, got: {stdout}"
     );
 }
 

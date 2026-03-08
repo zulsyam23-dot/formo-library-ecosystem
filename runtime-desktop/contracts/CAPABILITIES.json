@@ -6,17 +6,31 @@
     "compiled style map"
   ],
   "outputs": [
-    "index.html",
-    "app.css",
-    "app.js",
-    "desktop-bridge.js",
-    "app.ir.json"
+    "app.native.json",
+    "app.native.rs",
+    "app.ir.json",
+    "native-app/Cargo.toml",
+    "native-app/src/main.rs",
+    "native-app/src/app.rs",
+    "native-app/src/model.rs",
+    "native-app/src/style.rs",
+    "native-app/src/render/mod.rs",
+    "native-app/src/render/flow.rs",
+    "native-app/src/render/controls.rs",
+    "native-app/src/render/media.rs",
+    "native-app/src/render/shared.rs",
+    "native-app/src/render/state.rs",
+    "native-app/README.md"
   ],
   "capabilities": [
-    "desktop_bundle_emit",
-    "desktop_bridge_actions",
+    "desktop_native_bundle_emit",
+    "desktop_native_scaffold_emit",
+    "desktop_style_parity_core",
+    "desktop_widget_parity_extended",
+    "desktop_host_actions",
     "desktop_state_bridge",
-    "ir_snapshot_emit"
+    "ir_snapshot_emit",
+    "desktop_parity_diagnostics"
   ],
   "maps_to_crates": [
     "programs/formo-backend-desktop"

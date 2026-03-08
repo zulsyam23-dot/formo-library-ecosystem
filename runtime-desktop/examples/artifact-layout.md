@@ -1,14 +1,36 @@
 # Runtime Desktop Artifact Layout
 
-Contoh artifact hasil build target desktop:
+Contoh artifact hasil build target desktop (native Rust):
 
-1. `index.html`
-2. `app.css`
-3. `app.js`
-4. `desktop-bridge.js`
-5. `app.ir.json`
+1. `app.native.json`
+2. `app.native.rs`
+3. `app.ir.json`
+4. `native-app/Cargo.toml`
+5. `native-app/src/main.rs`
+6. `native-app/src/app.rs`
+7. `native-app/src/model.rs`
+8. `native-app/src/style.rs`
+9. `native-app/src/render/mod.rs`
+10. `native-app/src/render/flow.rs`
+11. `native-app/src/render/controls.rs`
+12. `native-app/src/render/media.rs`
+13. `native-app/src/render/shared.rs`
+14. `native-app/src/render/state.rs`
+15. `native-app/README.md`
 
 Kontrak minimal:
 
-- bridge host via `window.formoDesktopHost.invokeAction(...)`
-- state bridge via `window.formoDesktop.setStatePatch(...)`
+- runtime target: `rust-native` (tanpa webview).
+- style parity core:
+  - visual: `color`, `background`, `border`, `border-radius`, `box-shadow`, `opacity`
+  - spacing/sizing: `padding`, `margin`, `gap`, `width/height`, `min/max-width`, `min/max-height`
+  - layout/text: `align-items`, `justify-content`, `text-align`, `line-height`, `overflow`, `font-weight`, `font-style`
+- widget parity tambahan: `Image`, `Spacer`, `Checkbox`, `Switch`, `Modal`, `Fragment`, `If`, `For`
+  - scope `For`: `alias`, `aliasIndex`, `aliasKey`
+  - interaction `Modal`: close button, backdrop click, `Escape`
+- host action bridge: trait `FormoDesktopHost`.
+- state bridge: `FormoDesktopState::set_state_patch(...)` dan `replace_state(...)`.
+- parity diagnostics: warning style/widget unsupported muncul di `app.native.json.diagnostics`.
+- scaffold GUI native bisa langsung dijalankan dengan `cd native-app && cargo run`.
+- build executable release bisa dipicu dari CLI dengan `formo build --target desktop --release-exe`
+  (hasil di `native-app/target/release`, `.exe` untuk Windows).

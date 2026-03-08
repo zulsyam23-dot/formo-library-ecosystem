@@ -23,7 +23,7 @@ Update terakhir: 2026-03-07
 3. `runtime-web` (`active`)
    - Emitter web artifact + runtime state/action/control-flow dimigrasikan.
 4. `runtime-desktop` (`active`)
-   - Bundle webview + bridge desktop + IR snapshot dimigrasikan.
+   - Bundle native Rust + scaffold GUI native + style parity core + bridge host desktop + IR snapshot dimigrasikan.
 5. `tooling` (`active`)
    - Command CLI utama, watch mode, benchmark, dan diagnostic output dimigrasikan.
 6. `ai-interop` (`bootstrap`)

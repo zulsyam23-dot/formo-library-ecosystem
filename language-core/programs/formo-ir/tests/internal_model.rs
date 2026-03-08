@@ -1,6 +1,6 @@
 use formo_ir::internal::InternalProgram;
 use formo_ir::{
-    IR_VERSION, IrComponent, IrNode, IrProgram, IrStyle, SourceLoc, StyleSelector, Target, Value,
+    IrComponent, IrNode, IrProgram, IrStyle, SourceLoc, StyleSelector, Target, Value, IR_VERSION,
 };
 use std::collections::BTreeMap;
 

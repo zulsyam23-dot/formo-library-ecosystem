@@ -6,8 +6,8 @@ version = 4
 name = "formo-backend-desktop"
 version = "0.1.0"
 dependencies = [
- "formo-backend-web",
  "formo-ir",
+ "serde",
  "serde_json",
 ]
 

@@ -546,7 +546,10 @@ mod tests {
         let budget = evaluate_budget(&args, &compile, &render);
         assert!(budget.ok);
         assert!(budget.compile.as_ref().is_some_and(|result| result.pass));
-        assert!(budget.first_render.as_ref().is_some_and(|result| result.pass));
+        assert!(budget
+            .first_render
+            .as_ref()
+            .is_some_and(|result| result.pass));
     }
 
     #[test]
@@ -558,15 +561,11 @@ mod tests {
         let budget = evaluate_budget(&args, &compile, &render);
         assert!(!budget.ok);
         assert!(
-            budget
-                .failure_summary()
-                .contains("compile p95"),
+            budget.failure_summary().contains("compile p95"),
             "expected compile budget failure reason"
         );
         assert!(
-            budget
-                .failure_summary()
-                .contains("first-render p95"),
+            budget.failure_summary().contains("first-render p95"),
             "expected first-render budget failure reason"
         );
     }

@@ -15,6 +15,7 @@ pub struct BuildArgs {
     pub out_dir: String,
     pub watch: bool,
     pub prod: bool,
+    pub release_exe: bool,
 }
 
 pub struct LspArgs {
@@ -56,8 +57,12 @@ pub fn print_help() {
     println!("  lsp [input|--input file] [--watch]");
     println!("  fmt [input|--input file] [--check] [--stdout]");
     println!("  doctor [input|--input file] [--json] [--json-pretty] [--json-schema]");
-    println!("  build [--target web|desktop|multi] [--input file] [--out dir] [--watch] [--prod]");
-    println!("    note: web/desktop target tersedia jika feature backend-web/backend-desktop aktif.");
+    println!(
+        "  build [--target web|desktop|multi] [--input file] [--out dir] [--watch] [--prod] [--release-exe]"
+    );
+    println!(
+        "    note: web/desktop target tersedia jika feature backend-web/backend-desktop aktif."
+    );
     println!(
         "  bench [--input file] [--iterations N] [--warmup N] [--nodes N] [--out file] [--json-pretty] [--max-compile-p95-ms N] [--max-first-render-p95-ms N]"
     );
@@ -130,6 +135,7 @@ pub fn parse_build_args(args: &[String]) -> Result<BuildArgs, CliError> {
     let mut out_dir = "dist".to_string();
     let mut watch = false;
     let mut prod = false;
+    let mut release_exe = false;
 
     let mut i = 0;
     while i < args.len() {
@@ -161,6 +167,9 @@ pub fn parse_build_args(args: &[String]) -> Result<BuildArgs, CliError> {
             "--prod" => {
                 prod = true;
             }
+            "--release-exe" => {
+                release_exe = true;
+            }
             other => {
                 return Err(CliError::new(format!("unknown option: {other}")));
             }
@@ -174,6 +183,7 @@ pub fn parse_build_args(args: &[String]) -> Result<BuildArgs, CliError> {
         out_dir,
         watch,
         prod,
+        release_exe,
     })
 }
 
@@ -418,4 +428,34 @@ pub fn parse_benchmark_args(args: &[String]) -> Result<BenchmarkArgs, CliError> 
         max_compile_p95_ms,
         max_first_render_p95_ms,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_build_args;
+
+    #[test]
+    fn parse_build_args_reads_release_exe_flag() {
+        let args = vec![
+            "--target".to_string(),
+            "desktop".to_string(),
+            "--input".to_string(),
+            "main.fm".to_string(),
+            "--out".to_string(),
+            "dist-desktop".to_string(),
+            "--release-exe".to_string(),
+        ];
+
+        let parsed = parse_build_args(&args).expect("build args should parse");
+        assert_eq!(parsed.target, "desktop");
+        assert_eq!(parsed.input, "main.fm");
+        assert_eq!(parsed.out_dir, "dist-desktop");
+        assert!(parsed.release_exe);
+    }
+
+    #[test]
+    fn parse_build_args_release_exe_default_is_false() {
+        let parsed = parse_build_args(&[]).expect("build args should parse");
+        assert!(!parsed.release_exe);
+    }
 }

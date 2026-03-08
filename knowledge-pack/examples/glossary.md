@@ -1,7 +1,23 @@
-# Formo Glossary (Seed)
+# Formo Glossary
 
 - `FM`: file source bahasa Formo (`.fm`).
 - `FS`: file style Formo (`.fs`).
 - `IR`: intermediate representation antar pipeline compiler dan backend.
-- `Lowering`: proses menurunkan AST/semantic model menjadi IR.
-- `Built-in node`: komponen bawaan seperti `Page`, `Text`, `Button`, `For`, `If`.
+- `Lexer`: tahap tokenisasi source.
+- `Parser`: tahap membangun AST dari token.
+- `Resolver`: tahap resolving import/module graph.
+- `Typer`: tahap validasi semantik dan tipe.
+- `Style Compiler`: tahap parse dan validasi `.fs`, token, dan style registry.
+- `Lowering`: proses menurunkan model semantik menjadi IR node/component/style map.
+- `Built-in node`: komponen bawaan seperti `Page`, `Text`, `Button`, `For`, `If`, `Modal`.
+- `Custom component`: komponen yang dideklarasikan user.
+- `Slot`: placeholder untuk menerima inline children dari pemanggil custom component.
+- `State type`: tipe state seperti `state<string>` dan `state<bool>`.
+- `Action type`: tipe callback/action seperti `action<void>`, `action<string>`, `action<bool>`.
+- `List source`: sumber data untuk `<For each=...>`.
+- `Style ref`: referensi style dari attribute `style=...` pada node.
+- `Token`: variabel nilai style global, didefinisikan pada blok `token`.
+- `Parity`: tingkat kemiripan hasil render antar target web dan desktop native.
+- `Parity warning`: warning gap support style/widget di backend desktop (`W7601`, `W7602`).
+- `Doctor`: command pemeriksaan health environment + status pipeline.
+- `Diagnose`: command diagnosis detail termasuk statistik dan mode JSON/LSP.

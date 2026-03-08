@@ -124,12 +124,7 @@ impl Lexer {
             self.advance_char(ch);
         }
 
-        self.push_diag(
-            "E1001",
-            "unterminated block comment",
-            start_line,
-            start_col,
-        );
+        self.push_diag("E1001", "unterminated block comment", start_line, start_col);
     }
 
     fn lex_string(&mut self) {
@@ -333,11 +328,26 @@ component App() {
 "#;
         let out = lex_with_diagnostics(src);
         assert!(out.diagnostics.is_empty(), "unexpected diagnostics");
-        assert!(out.tokens.iter().any(|t| t.kind == "ident" && t.lexeme == "component"));
-        assert!(out.tokens.iter().any(|t| t.kind == "string" && t.lexeme == "Hello"));
-        assert!(out.tokens.iter().any(|t| t.kind == "int" && t.lexeme == "1"));
-        assert!(out.tokens.iter().any(|t| t.kind == "float" && t.lexeme == "2.5"));
-        assert!(out.tokens.iter().any(|t| t.kind == "bool" && t.lexeme == "true"));
+        assert!(out
+            .tokens
+            .iter()
+            .any(|t| t.kind == "ident" && t.lexeme == "component"));
+        assert!(out
+            .tokens
+            .iter()
+            .any(|t| t.kind == "string" && t.lexeme == "Hello"));
+        assert!(out
+            .tokens
+            .iter()
+            .any(|t| t.kind == "int" && t.lexeme == "1"));
+        assert!(out
+            .tokens
+            .iter()
+            .any(|t| t.kind == "float" && t.lexeme == "2.5"));
+        assert!(out
+            .tokens
+            .iter()
+            .any(|t| t.kind == "bool" && t.lexeme == "true"));
     }
 
     #[test]

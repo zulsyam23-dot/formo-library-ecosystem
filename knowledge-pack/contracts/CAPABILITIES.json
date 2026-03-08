@@ -1,6 +1,6 @@
 {
   "library": "knowledge-pack",
-  "status": "bootstrap",
+  "status": "active",
   "inputs": [
     "official formo docs",
     "feature contracts",
@@ -8,13 +8,34 @@
   ],
   "outputs": [
     "glossary",
+    "quickstart guide",
+    "language reference",
+    "style reference",
+    "cli/runtime reference",
+    "programming techniques",
+    "troubleshooting matrix",
     "prompt patterns",
+    "case studies",
+    "learning path curriculum",
+    "project architecture playbook",
+    "quality gates reference",
     "integration checklist"
   ],
   "capabilities": [
     "domain_glossary",
+    "quickstart_guide",
+    "formo_language_reference",
+    "formo_style_reference",
+    "cli_runtime_reference",
+    "programming_techniques",
+    "troubleshooting_matrix",
     "prompt_patterns",
-    "integration_checklists"
+    "case_study_examples",
+    "learning_path_curriculum",
+    "project_architecture_playbook",
+    "quality_gates_reference",
+    "integration_checklists",
+    "ai_playbook"
   ],
   "maps_to_crates": []
 }
