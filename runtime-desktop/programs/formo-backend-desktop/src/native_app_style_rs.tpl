@@ -100,6 +100,7 @@ pub struct RenderStyle {
     pub overflow: Overflow,
     pub wrap: bool,
     pub display_none: bool,
+    pub display_flex: bool,
 }
 
 impl RenderStyle {
@@ -180,6 +181,12 @@ impl RenderStyle {
                 .unwrap_or(false),
             display_none: style_text(node, &["display"])
                 .map(|v| normalize(v) == "none")
+                .unwrap_or(false),
+            display_flex: style_text(node, &["display"])
+                .map(|v| {
+                    let v = normalize(v);
+                    v == "flex" || v == "inline-flex"
+                })
                 .unwrap_or(false),
         }
     }

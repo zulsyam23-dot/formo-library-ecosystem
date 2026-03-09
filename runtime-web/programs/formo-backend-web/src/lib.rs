@@ -180,6 +180,18 @@ mod tests {
     }
 
     #[test]
+    fn runtime_supports_desktop_parity_scope_and_bind_aliases() {
+        let js = emitted_js(&sample_ir_with_for_loop());
+        assert!(js.contains("propAsString(node, \"onClick\", scope)"));
+        assert!(js.contains("propAsString(node, \"action\", scope)"));
+        assert!(js.contains("propAsString(node, \"bind\", scope)"));
+        assert!(js.contains("propAsString(node, \"name\", scope)"));
+        assert!(js.contains("nextScope[`${alias}Key`] = deriveForItemKey(item, index);"));
+        assert!(js.contains("const hasCondition = Boolean(propRecord(node, \"condition\"));"));
+        assert!(js.contains("const eachValue = deriveForItems(node, scope);"));
+    }
+
+    #[test]
     fn runtime_emits_readable_split_files() {
         let backend = WebBackend;
         let output = backend

@@ -332,18 +332,13 @@ fn run_build_once(build_args: &args::BuildArgs) -> Result<(), CliError> {
             "`--release-exe` only supports `desktop` or `multi` target",
         ));
     }
-    if build_args.strict_parity && build_args.target == "web" {
-        return Err(CliError::new(
-            "`--strict-parity` requires target `desktop` or `multi`",
-        ));
-    }
-
     let ir = pipeline(&build_args.input)?;
     let report = output::emit_target(
         &ir,
         &build_args.target,
         &build_args.out_dir,
         build_args.prod,
+        build_args.strict_parity,
     )?;
     let mode = if build_args.prod {
         "production"

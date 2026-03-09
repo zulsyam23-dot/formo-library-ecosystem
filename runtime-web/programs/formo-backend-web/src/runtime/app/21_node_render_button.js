@@ -2,10 +2,16 @@
         element = el("button", "fm-button");
         childMount = element;
         element.type = "button";
-        element.textContent = propAsString(node, "label", scope) || "Button";
+        element.textContent =
+          propAsString(node, "label", scope) ||
+          propAsString(node, "text", scope) ||
+          "Button";
         element.disabled = propAsBool(node, "disabled", false, scope);
 
-        const actionName = propAsString(node, "onPress", scope);
+        const actionName =
+          propAsString(node, "onPress", scope) ||
+          propAsString(node, "onClick", scope) ||
+          propAsString(node, "action", scope);
         element.addEventListener("click", () => {
           runWithEventBoundary("Button.click", node, () => {
             dispatchAction(actionName, null, node, scope);

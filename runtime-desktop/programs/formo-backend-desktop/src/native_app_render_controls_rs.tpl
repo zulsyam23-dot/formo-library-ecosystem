@@ -175,7 +175,25 @@ pub(super) fn render_checkbox(
         let mut checked = read_state_bool(state, &storage_key)
             .unwrap_or_else(|| prop_bool(node, "checked", state, scope, false));
         let response = ui
-            .add_enabled_ui(!disabled, |ui| ui.checkbox(&mut checked, label))
+            .add_enabled_ui(!disabled, |ui| {
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = style.gap.unwrap_or(8.0).max(0.0);
+                    let resp =
+                        ui.add_sized([16.0, 16.0], egui::Checkbox::without_text(&mut checked));
+                    if !label.is_empty() {
+                        let rich = apply_text_style(
+                            RichText::new(label).size(style.font_size.unwrap_or(14.0)),
+                            style,
+                            parse_hex_color("#151515"),
+                            None,
+                            false,
+                        );
+                        ui.label(rich);
+                    }
+                    resp
+                })
+                .inner
+            })
             .inner;
         if response.changed() {
             state.insert(storage_key, JsonValue::Bool(checked));
@@ -217,8 +235,17 @@ pub(super) fn render_switch(
         let response = ui
             .add_enabled_ui(!disabled, |ui| {
                 ui.horizontal(|ui| {
-                    let resp = ui.checkbox(&mut checked, "");
-                    ui.label(label);
+                    ui.spacing_mut().item_spacing.x = style.gap.unwrap_or(8.0).max(0.0);
+                    let resp =
+                        ui.add_sized([16.0, 16.0], egui::Checkbox::without_text(&mut checked));
+                    let rich = apply_text_style(
+                        RichText::new(label).size(style.font_size.unwrap_or(14.0)),
+                        style,
+                        parse_hex_color("#151515"),
+                        None,
+                        false,
+                    );
+                    ui.label(rich);
                     resp
                 })
                 .inner

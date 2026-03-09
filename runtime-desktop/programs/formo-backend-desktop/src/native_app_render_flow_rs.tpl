@@ -52,6 +52,49 @@ pub(super) fn render_flex(
     });
 }
 
+pub(super) fn render_block(
+    ui: &mut egui::Ui,
+    node: &NativeNode,
+    style: RenderStyle,
+    state: &mut NativeState,
+    action_log: &mut ActionLog,
+    scope: &RenderScope,
+) {
+    with_style_container(ui, style, FrameDefaults::default(), |ui| {
+        for child in &node.children {
+            render_tree_scoped(ui, child, state, action_log, scope);
+        }
+    });
+}
+
+pub(super) fn render_scroll(
+    ui: &mut egui::Ui,
+    node: &NativeNode,
+    style: RenderStyle,
+    state: &mut NativeState,
+    action_log: &mut ActionLog,
+    scope: &RenderScope,
+) {
+    with_style_container(ui, style, FrameDefaults::default(), |ui| {
+        apply_gap(ui, style.gap, None);
+        egui::ScrollArea::both().show(ui, |ui| {
+            if style.display_flex || style.flow.is_some() {
+                let flow = style.flow.unwrap_or(Flow::Column);
+                let layout = layout_from_style(flow, style);
+                ui.with_layout(layout, |ui| {
+                    for child in &node.children {
+                        render_tree_scoped(ui, child, state, action_log, scope);
+                    }
+                });
+            } else {
+                for child in &node.children {
+                    render_tree_scoped(ui, child, state, action_log, scope);
+                }
+            }
+        });
+    });
+}
+
 pub(super) fn render_frame_container(
     ui: &mut egui::Ui,
     node: &NativeNode,
@@ -86,7 +129,7 @@ pub(super) fn render_frame_container(
     };
 
     with_style_container(ui, style, defaults, |ui| {
-        apply_gap(ui, style.gap, Some(8.0));
+        apply_gap(ui, style.gap, None);
         if let Some(title) = prop_string(node, "title", scope) {
             if node.widget == "Window" {
                 egui::Frame::none()
@@ -156,7 +199,7 @@ pub(super) fn render_if(
     } else if has_condition {
         prop_bool(node, "condition", state, scope, false)
     } else {
-        true
+        false
     };
 
     if should_show {

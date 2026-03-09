@@ -37,9 +37,15 @@ pub(super) fn render_tree_scoped(
     }
 
     match node.widget.as_str() {
-        "Page" | "Column" | "Stack" | "Scroll" | "Row" => {
-            flow::render_flex(ui, node, style, state, action_log, scope)
+        "Page" | "Column" | "Row" => flow::render_flex(ui, node, style, state, action_log, scope),
+        "Stack" => {
+            if style.display_flex || style.flow.is_some() {
+                flow::render_flex(ui, node, style, state, action_log, scope)
+            } else {
+                flow::render_block(ui, node, style, state, action_log, scope)
+            }
         }
+        "Scroll" => flow::render_scroll(ui, node, style, state, action_log, scope),
         "Card" | "Window" => {
             flow::render_frame_container(ui, node, style, state, action_log, scope)
         }

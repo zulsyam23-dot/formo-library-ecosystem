@@ -249,6 +249,8 @@ fn native_scaffold_uses_egui_and_embeds_bundle_path() {
     assert!(app_rs.contains("impl eframe::App for FormoNativeApp"));
     assert!(app_rs.contains("fn configure_theme("));
     assert!(app_rs.contains("ctx.set_visuals(visuals);"));
+    assert!(app_rs.contains("visuals.widgets.inactive.rounding"));
+    assert!(app_rs.contains("TextStyle::Body"));
     assert!(app_rs.contains("Desktop parity warnings:"));
     assert!(model_rs.contains("pub diagnostics: Vec<NativeDiagnostic>"));
     assert!(style_rs.contains("pub struct RenderStyle"));
@@ -257,17 +259,24 @@ fn native_scaffold_uses_egui_and_embeds_bundle_path() {
     assert!(style_rs.contains("fn parse_len_px("));
     assert!(style_rs.contains("fn parse_box_shadow("));
     assert!(style_rs.contains("fn parse_border_shorthand("));
+    assert!(style_rs.contains("pub display_flex: bool"));
     assert!(render_mod_rs.contains("\"Checkbox\" =>"));
     assert!(render_mod_rs.contains("\"Switch\" =>"));
     assert!(render_mod_rs.contains("\"Modal\" =>"));
     assert!(render_mod_rs.contains("\"Image\" =>"));
     assert!(render_mod_rs.contains("\"If\" =>"));
     assert!(render_mod_rs.contains("\"For\" =>"));
+    assert!(render_mod_rs.contains("\"Stack\" =>"));
+    assert!(render_mod_rs.contains("flow::render_block("));
+    assert!(render_mod_rs.contains("\"Scroll\" => flow::render_scroll("));
     assert!(render_shared_rs.contains("fn layout_from_style("));
     assert!(render_shared_rs.contains("fn apply_gap("));
     assert!(render_state_rs.contains("fn emit_action("));
     assert!(render_state_rs.contains("fn derive_for_item_key("));
     assert!(render_state_rs.contains("fn prop_usize("));
+    assert!(render_flow_rs.contains("fn render_block("));
+    assert!(render_flow_rs.contains("fn render_scroll("));
+    assert!(render_flow_rs.contains("apply_gap(ui, style.gap, None);"));
     assert!(render_flow_rs.contains("fn render_if("));
     assert!(render_flow_rs.contains("fn render_for("));
     assert!(render_flow_rs.contains("{}Key"));
@@ -275,6 +284,8 @@ fn native_scaffold_uses_egui_and_embeds_bundle_path() {
     assert!(render_media_rs.contains("fn render_modal("));
     assert!(render_media_rs.contains("egui::Key::Escape"));
     assert!(render_media_rs.contains("egui::Sense::click()"));
+    assert!(render_media_rs.contains(".max_width(max_modal_width)"));
+    assert!(render_media_rs.contains("ScrollArea::vertical()"));
 }
 
 #[test]

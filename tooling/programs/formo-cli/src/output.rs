@@ -35,16 +35,17 @@ pub fn emit_target(
     target: &str,
     out_dir: &str,
     production: bool,
+    strict_parity: bool,
 ) -> Result<EmitReport, String> {
     if !Path::new(out_dir).exists() {
         fs::create_dir_all(out_dir).map_err(|e| format!("cannot create {out_dir}: {e}"))?;
     }
 
     match target {
-        "web" => emit_web(ir, out_dir, production),
+        "web" => emit_web(ir, out_dir, production, strict_parity),
         "desktop" => emit_desktop(ir, out_dir),
         "multi" => {
-            let mut report = emit_web(ir, &format!("{out_dir}/web"), production)?;
+            let mut report = emit_web(ir, &format!("{out_dir}/web"), production, false)?;
             report.merge(emit_desktop(ir, &format!("{out_dir}/desktop"))?);
             Ok(report)
         }
@@ -52,15 +53,23 @@ pub fn emit_target(
     }
 }
 
-fn emit_web(ir: &IrProgram, out_dir: &str, production: bool) -> Result<EmitReport, String> {
+fn emit_web(
+    ir: &IrProgram,
+    out_dir: &str,
+    production: bool,
+    strict_parity: bool,
+) -> Result<EmitReport, String> {
     #[cfg(feature = "backend-web")]
     {
         write_output(WebBackend.emit(ir)?, out_dir, production)?;
+        if strict_parity {
+            return run_web_desktop_parity_audit(ir, out_dir);
+        }
         return Ok(EmitReport::default());
     }
     #[cfg(not(feature = "backend-web"))]
     {
-        let _ = (ir, out_dir, production);
+        let _ = (ir, out_dir, production, strict_parity);
         Err("target `web` unavailable: rebuild formo-cli with feature `backend-web`".to_string())
     }
 }
@@ -69,7 +78,10 @@ fn emit_desktop(ir: &IrProgram, out_dir: &str) -> Result<EmitReport, String> {
     #[cfg(feature = "backend-desktop")]
     {
         let output = DesktopBackend.emit(ir)?;
-        let report = summarize_desktop_output(&output, out_dir);
+        let mut report = summarize_desktop_output(&output);
+        if report.desktop_parity_warning_count > 0 {
+            report.desktop_parity_diagnostics_path = Some(format!("{out_dir}/app.native.json"));
+        }
         write_output(output, out_dir, false)?;
         return Ok(report);
     }
@@ -84,34 +96,18 @@ fn emit_desktop(ir: &IrProgram, out_dir: &str) -> Result<EmitReport, String> {
 }
 
 #[cfg(feature = "backend-desktop")]
-fn summarize_desktop_output(output: &BackendOutput, out_dir: &str) -> EmitReport {
+fn summarize_desktop_output(output: &BackendOutput) -> EmitReport {
+    let parity_diagnostics = collect_desktop_parity_diagnostics(output);
+    summarize_desktop_parity_diagnostics(&parity_diagnostics)
+}
+
+#[cfg(feature = "backend-desktop")]
+fn summarize_desktop_parity_diagnostics(parity_diagnostics: &[serde_json::Value]) -> EmitReport {
     let mut report = EmitReport::default();
-
-    let Some(bundle) = output
-        .files
-        .iter()
-        .find(|file| file.path == "app.native.json")
-    else {
-        return report;
-    };
-
-    let parsed: serde_json::Value = match serde_json::from_str(&bundle.content) {
-        Ok(value) => value,
-        Err(_) => return report,
-    };
-
-    let Some(diagnostics) = parsed.get("diagnostics").and_then(|value| value.as_array()) else {
-        return report;
-    };
-
-    for diagnostic in diagnostics {
+    for diagnostic in parity_diagnostics {
         let Some(code) = diagnostic.get("code").and_then(|value| value.as_str()) else {
             continue;
         };
-        if !code.starts_with("W76") {
-            continue;
-        }
-
         report.desktop_parity_warning_count += 1;
         match code {
             "W7601" => report.desktop_style_warning_count += 1,
@@ -119,12 +115,81 @@ fn summarize_desktop_output(output: &BackendOutput, out_dir: &str) -> EmitReport
             _ => {}
         }
     }
+    report
+}
+
+#[cfg(feature = "backend-desktop")]
+fn collect_desktop_parity_diagnostics(output: &BackendOutput) -> Vec<serde_json::Value> {
+    let Some(bundle) = output
+        .files
+        .iter()
+        .find(|file| file.path == "app.native.json")
+    else {
+        return Vec::new();
+    };
+
+    let parsed: serde_json::Value = match serde_json::from_str(&bundle.content) {
+        Ok(value) => value,
+        Err(_) => return Vec::new(),
+    };
+
+    let Some(diagnostics) = parsed.get("diagnostics").and_then(|value| value.as_array()) else {
+        return Vec::new();
+    };
+
+    diagnostics
+        .iter()
+        .filter(|diagnostic| {
+            diagnostic
+                .get("code")
+                .and_then(|value| value.as_str())
+                .is_some_and(|code| code.starts_with("W76"))
+        })
+        .cloned()
+        .collect()
+}
+
+#[cfg(all(feature = "backend-web", feature = "backend-desktop"))]
+fn run_web_desktop_parity_audit(ir: &IrProgram, out_dir: &str) -> Result<EmitReport, String> {
+    let output = DesktopBackend.emit(ir)?;
+    let parity_diagnostics = collect_desktop_parity_diagnostics(&output);
+    let mut report = summarize_desktop_parity_diagnostics(&parity_diagnostics);
 
     if report.desktop_parity_warning_count > 0 {
-        report.desktop_parity_diagnostics_path = Some(format!("{out_dir}/app.native.json"));
+        let parity_report_path = format!("{out_dir}/desktop.parity.json");
+        write_parity_report(&parity_report_path, &parity_diagnostics)?;
+        report.desktop_parity_diagnostics_path = Some(parity_report_path);
     }
 
-    report
+    Ok(report)
+}
+
+#[cfg(all(feature = "backend-web", not(feature = "backend-desktop")))]
+fn run_web_desktop_parity_audit(_ir: &IrProgram, _out_dir: &str) -> Result<EmitReport, String> {
+    Err(
+        "target `web` strict parity unavailable: rebuild formo-cli with feature `backend-desktop`"
+            .to_string(),
+    )
+}
+
+#[cfg(all(feature = "backend-web", feature = "backend-desktop"))]
+fn write_parity_report(path: &str, diagnostics: &[serde_json::Value]) -> Result<(), String> {
+    let payload = serde_json::json!({
+        "target": "desktop",
+        "warningCount": diagnostics.len(),
+        "diagnostics": diagnostics,
+    });
+
+    let text =
+        serde_json::to_string_pretty(&payload).map_err(|err| format!("cannot serialize parity report: {err}"))?;
+    if let Some(parent) = Path::new(path).parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent)
+                .map_err(|err| format!("cannot create {}: {err}", parent.display()))?;
+        }
+    }
+    fs::write(path, text).map_err(|err| format!("cannot write {path}: {err}"))?;
+    Ok(())
 }
 
 #[cfg(any(feature = "backend-web", feature = "backend-desktop"))]

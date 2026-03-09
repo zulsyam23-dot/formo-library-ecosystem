@@ -21,9 +21,13 @@
     for (const node of nodes.values()) {
       switch (node.name) {
         case "Input": {
-          const key = propAsString(node, "value");
+          const key =
+            propAsString(node, "value") ||
+            propAsString(node, "bind") ||
+            propAsString(node, "name");
+          const defaultValue = propAsString(node, "defaultValue");
           if (key && !(key in stateStore)) {
-            stateStore[key] = "";
+            stateStore[key] = defaultValue || "";
           }
           break;
         }
@@ -31,7 +35,7 @@
         case "Switch": {
           const key = propAsString(node, "checked");
           if (key && !(key in stateStore)) {
-            stateStore[key] = false;
+            stateStore[key] = propAsBool(node, "checked", false);
           }
           break;
         }

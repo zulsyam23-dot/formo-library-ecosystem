@@ -37,10 +37,25 @@ fn configure_theme(ctx: &egui::Context) {
     visuals.widgets.inactive.bg_stroke = egui::Stroke::new(1.0, Color32::from_rgb(0xB8, 0xBF, 0xD8));
     visuals.widgets.active.bg_fill = Color32::from_rgb(0xE8, 0xEE, 0xFF);
     visuals.widgets.hovered.bg_fill = Color32::from_rgb(0xEC, 0xF1, 0xFF);
+    visuals.widgets.inactive.rounding = egui::Rounding::same(8.0);
+    visuals.widgets.hovered.rounding = egui::Rounding::same(8.0);
+    visuals.widgets.active.rounding = egui::Rounding::same(8.0);
     visuals.selection.bg_fill = Color32::from_rgb(0xD9, 0xE6, 0xFF);
     ctx.set_visuals(visuals);
 
     let mut style = (*ctx.style()).clone();
+    style.text_styles.insert(
+        egui::TextStyle::Body,
+        egui::FontId::new(16.0, egui::FontFamily::Proportional),
+    );
+    style.text_styles.insert(
+        egui::TextStyle::Button,
+        egui::FontId::new(14.0, egui::FontFamily::Proportional),
+    );
+    style.text_styles.insert(
+        egui::TextStyle::Small,
+        egui::FontId::new(12.0, egui::FontFamily::Proportional),
+    );
     style.spacing.item_spacing = egui::vec2(8.0, 8.0);
     style.spacing.button_padding = egui::vec2(12.0, 8.0);
     style.spacing.window_margin = egui::Margin::same(12.0);

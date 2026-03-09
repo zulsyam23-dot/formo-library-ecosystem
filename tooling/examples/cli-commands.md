@@ -7,6 +7,7 @@ cargo run -p formo-cli -- check main.fm
 cargo run -p formo-cli -- logic --input language-core/examples/app-controller.fl --json-pretty --rt-manifest-out dist-ci/runtime/logic.manifest.json
 cargo run -p formo-cli -- diagnose --input main.fm --json
 cargo run -p formo-cli -- build --target web --input main.fm --out dist
+cargo run -p formo-cli -- build --target web --input main.fm --out dist --strict-parity
 cargo run -p formo-cli -- build --target desktop --input main.fm --out dist
 cargo run -p formo-cli -- build --target desktop --input main.fm --out dist --strict-parity
 cargo run -p formo-cli -- build --target desktop --input main.fm --out dist --release-exe

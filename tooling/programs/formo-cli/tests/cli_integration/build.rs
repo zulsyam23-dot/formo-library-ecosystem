@@ -193,6 +193,78 @@ fn build_desktop_reports_parity_warnings_in_stdout() {
 }
 
 #[test]
+fn build_web_strict_parity_fails_when_desktop_parity_gap_exists() {
+    let workspace = TempWorkspace::new("formo_cli_build_web_strict_parity_fail");
+    create_desktop_parity_gap_sample(workspace.path());
+
+    let output = Command::new(formo_bin())
+        .current_dir(workspace.path())
+        .args([
+            "build",
+            "--target",
+            "web",
+            "--input",
+            "main.fm",
+            "--out",
+            "dist-web",
+            "--strict-parity",
+        ])
+        .output()
+        .expect("should run formo build web strict parity");
+
+    assert!(
+        !output.status.success(),
+        "expected strict parity failure, stdout={}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("E7600 strict parity failed"),
+        "expected strict parity error in stderr, got: {stderr}"
+    );
+    assert!(
+        workspace.path().join("dist-web/desktop.parity.json").exists(),
+        "expected parity report file for failed strict parity web build"
+    );
+}
+
+#[test]
+fn build_web_strict_parity_passes_when_desktop_parity_is_clean() {
+    let workspace = TempWorkspace::new("formo_cli_build_web_strict_parity_pass");
+    create_multifile_sample(workspace.path());
+
+    let output = Command::new(formo_bin())
+        .current_dir(workspace.path())
+        .args([
+            "build",
+            "--target",
+            "web",
+            "--input",
+            "main.fm",
+            "--out",
+            "dist-web",
+            "--strict-parity",
+        ])
+        .output()
+        .expect("should run formo build web strict parity");
+
+    assert!(
+        output.status.success(),
+        "expected strict parity success, stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        workspace.path().join("dist-web/index.html").exists(),
+        "expected web artifacts on strict parity success"
+    );
+    assert!(
+        !workspace.path().join("dist-web/desktop.parity.json").exists(),
+        "did not expect parity report file when there is no parity warning"
+    );
+}
+
+#[test]
 fn build_web_prod_generates_minified_assets() {
     let workspace = TempWorkspace::new("formo_cli_build_web_prod");
     create_multifile_sample(workspace.path());

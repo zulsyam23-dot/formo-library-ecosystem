@@ -11,7 +11,8 @@ Daftar fitur tooling Formo yang wajib tersedia di library ini.
    - `logic` menegakkan strict profile (event/function naming, typed function params, enum/struct/type rules, logic global-core action, service platform-agnostic, adapter call-only, parity platform simetris, throw try/catch-only, break/continue loop-only, return-last-action).
 2. `build_multi_target`
    - `build --target web|desktop|multi`.
-   - `build --strict-parity` untuk memaksa zero desktop parity warning (`W7601`/`W7602`).
+   - `build --strict-parity` untuk memaksa zero desktop parity warning (`W7601`/`W7602`) pada target `web`, `desktop`, maupun `multi`.
+   - Pada target `web`, `--strict-parity` membutuhkan feature `backend-desktop` agar audit parity dapat dijalankan.
 3. `watch_mode`
    - Watch mode untuk `check`, `diagnose`, dan `build`.
 4. `benchmark_mode`

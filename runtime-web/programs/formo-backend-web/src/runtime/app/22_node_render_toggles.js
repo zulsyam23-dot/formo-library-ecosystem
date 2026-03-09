@@ -5,18 +5,25 @@
         input.type = "checkbox";
         input.disabled = propAsBool(node, "disabled", false, scope);
 
-        const stateKey = propAsString(node, "checked", scope);
+        const explicitStateKey = propAsString(node, "checked", scope);
+        const stateKey = explicitStateKey || `__local_check::${node.id}`;
         const actionName = propAsString(node, "onChange", scope);
-        if (stateKey) {
-          input.dataset.stateKey = stateKey;
-          input.checked = Boolean(readState(stateKey, false));
-          input.addEventListener("change", () => {
-            runWithEventBoundary("Checkbox.change", node, () => {
-              writeState(stateKey, input.checked);
-              dispatchAction(actionName, input.checked, node, scope);
-            });
-          });
+        const initial = propAsBool(node, "checked", false, scope);
+        if (!(stateKey in stateStore)) {
+          stateStore[stateKey] = initial;
         }
+        if (explicitStateKey) {
+          input.dataset.stateKey = explicitStateKey;
+        }
+        input.checked = Boolean(readState(stateKey, initial));
+        input.addEventListener("change", () => {
+          runWithEventBoundary("Checkbox.change", node, () => {
+            writeState(stateKey, input.checked);
+            if (explicitStateKey) {
+              dispatchAction(actionName, input.checked, node, scope);
+            }
+          });
+        });
 
         const text = propAsString(node, "label", scope);
         const caption = el("span", "fm-check-label");
@@ -32,18 +39,25 @@
         input.type = "checkbox";
         input.disabled = propAsBool(node, "disabled", false, scope);
 
-        const stateKey = propAsString(node, "checked", scope);
+        const explicitStateKey = propAsString(node, "checked", scope);
+        const stateKey = explicitStateKey || `__local_switch::${node.id}`;
         const actionName = propAsString(node, "onChange", scope);
-        if (stateKey) {
-          input.dataset.stateKey = stateKey;
-          input.checked = Boolean(readState(stateKey, false));
-          input.addEventListener("change", () => {
-            runWithEventBoundary("Switch.change", node, () => {
-              writeState(stateKey, input.checked);
-              dispatchAction(actionName, input.checked, node, scope);
-            });
-          });
+        const initial = propAsBool(node, "checked", false, scope);
+        if (!(stateKey in stateStore)) {
+          stateStore[stateKey] = initial;
         }
+        if (explicitStateKey) {
+          input.dataset.stateKey = explicitStateKey;
+        }
+        input.checked = Boolean(readState(stateKey, initial));
+        input.addEventListener("change", () => {
+          runWithEventBoundary("Switch.change", node, () => {
+            writeState(stateKey, input.checked);
+            if (explicitStateKey) {
+              dispatchAction(actionName, input.checked, node, scope);
+            }
+          });
+        });
 
         const text = propAsString(node, "label", scope) || "Switch";
         const caption = el("span", "fm-switch-label");

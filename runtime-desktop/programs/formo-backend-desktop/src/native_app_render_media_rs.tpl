@@ -7,7 +7,7 @@ use super::shared::{
     apply_gap, apply_text_style, show_text, with_style_container, FrameDefaults,
 };
 use super::state::{
-    emit_action, prop_bool, prop_len, prop_string, read_state_bool,
+    emit_action, prop_len, prop_string, read_state_bool,
 };
 use super::{render_tree_scoped, ActionLog, NativeState, RenderScope};
 
@@ -19,19 +19,19 @@ pub(super) fn render_text(
 ) {
     with_style_container(ui, style, FrameDefaults::default(), |ui| {
         let text = prop_string(node, "value", scope).unwrap_or_else(|| "Text".to_string());
+        let font_size = style.font_size.unwrap_or(16.0);
         let rich = apply_text_style(
-            RichText::new(text).size(style.font_size.unwrap_or(16.0)),
+            RichText::new(text).size(font_size),
             style,
             parse_hex_color("#151515"),
             None,
             false,
         );
         show_text(ui, rich, style.text_align);
-        if let Some(lh) = style.line_height {
-            let extra = ((lh.max(1.0) - 1.0) * style.font_size.unwrap_or(16.0)).max(0.0);
-            if extra > 0.0 {
-                ui.add_space(extra);
-            }
+        let line_height = style.line_height.unwrap_or(1.4).max(1.0);
+        let extra = ((line_height - 1.0) * font_size).max(0.0);
+        if extra > 0.0 {
+            ui.add_space(extra);
         }
     });
 }
@@ -112,11 +112,10 @@ pub(super) fn render_modal(
     scope: &RenderScope,
 ) {
     let open_key = prop_string(node, "open", scope);
-    let is_open = if let Some(key) = open_key.as_ref() {
-        read_state_bool(state, key).unwrap_or(false)
-    } else {
-        prop_bool(node, "open", state, scope, false)
-    };
+    let is_open = open_key
+        .as_ref()
+        .and_then(|key| read_state_bool(state, key))
+        .unwrap_or(false);
     if !is_open {
         return;
     }
@@ -126,6 +125,9 @@ pub(super) fn render_modal(
     let screen_rect = ui.ctx().screen_rect();
     let modal_id = format!("formo-modal-{}", node.id);
     let focus_state_key = format!("__modal_focused::{}", node.id);
+    let max_modal_width = (screen_rect.width() * 0.9).max(280.0);
+    let max_modal_height = (screen_rect.height() * 0.8).max(160.0);
+    let preferred_width = style.width.unwrap_or(360.0).max(280.0).min(max_modal_width);
 
     let backdrop_layer =
         egui::LayerId::new(egui::Order::Foreground, egui::Id::new(format!("{modal_id}-backdrop")));
@@ -161,7 +163,9 @@ pub(super) fn render_modal(
         .movable(false)
         .open(&mut window_open)
         .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
-        .default_width(style.width.unwrap_or(360.0).max(280.0))
+        .default_width(preferred_width)
+        .max_width(max_modal_width)
+        .max_height(max_modal_height)
         .show(ui.ctx(), |ui| {
             with_style_container(
                 ui,
@@ -194,9 +198,13 @@ pub(super) fn render_modal(
                         close_clicked = true;
                     }
                     apply_gap(ui, style.gap, Some(10.0));
-                    for child in &node.children {
-                        render_tree_scoped(ui, child, state, action_log, scope);
-                    }
+                    egui::ScrollArea::vertical()
+                        .max_height((max_modal_height - 64.0).max(80.0))
+                        .show(ui, |ui| {
+                            for child in &node.children {
+                                render_tree_scoped(ui, child, state, action_log, scope);
+                            }
+                        });
                 },
             );
         });

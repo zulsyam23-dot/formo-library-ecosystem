@@ -1,3 +1,27 @@
+  function deriveForItems(node, scope) {
+    const eachValue = propAsList(node, "each", scope);
+    if (eachValue.length > 0) {
+      return eachValue;
+    }
+
+    const countText = String(propAsString(node, "count", scope) || "").trim();
+    if (!countText) {
+      return [];
+    }
+
+    const parsed = Number(countText);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return [];
+    }
+
+    const count = Math.floor(parsed);
+    const out = [];
+    for (let i = 0; i < count; i += 1) {
+      out.push(i);
+    }
+    return out;
+  }
+
   function renderForItemsIntoContainer(container, childIds, alias, scope, eachValue, nodeMap) {
     const wrappers = [];
     for (let i = 0; i < eachValue.length; i += 1) {
@@ -15,6 +39,7 @@
     const nextScope = { ...(scope || {}) };
     nextScope[alias] = item;
     nextScope[`${alias}Index`] = index;
+    nextScope[`${alias}Key`] = deriveForItemKey(item, index);
 
     const children = [];
     for (const childId of childIds) {
