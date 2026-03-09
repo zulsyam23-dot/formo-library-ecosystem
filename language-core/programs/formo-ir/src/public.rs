@@ -195,6 +195,7 @@ fn canonical_style_value(key: &str, value: &Value) -> Value {
 
     let mapped = match key {
         "align-items" => canonical_align_value(&normalized),
+        "align-self" => canonical_align_value(&normalized),
         "justify-content" => canonical_justify_value(&normalized),
         "text-align" => canonical_text_align_value(&normalized),
         "overflow" => canonical_overflow_value(&normalized),
@@ -303,6 +304,13 @@ mod tests {
                 v: serde_json::Value::String("space-around".to_string()),
             },
         );
+        decls.insert(
+            "alignSelf".to_string(),
+            Value {
+                t: "string".to_string(),
+                v: serde_json::Value::String("self-end".to_string()),
+            },
+        );
 
         let out = normalize_style_decls(&decls);
         assert_eq!(
@@ -316,6 +324,12 @@ mod tests {
                 .and_then(|v| v.v.as_str())
                 .unwrap_or(""),
             "space-between"
+        );
+        assert_eq!(
+            out.get("align-self")
+                .and_then(|v| v.v.as_str())
+                .unwrap_or(""),
+            "end"
         );
     }
 }

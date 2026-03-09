@@ -101,7 +101,12 @@ pub struct RenderStyle {
     pub has_margin: bool,
     pub flow: Option<Flow>,
     pub align: AlignMode,
+    pub align_self: Option<AlignMode>,
     pub justify: JustifyMode,
+    pub flex_grow: Option<f32>,
+    pub flex_shrink: Option<f32>,
+    pub flex_basis: Option<f32>,
+    pub flex_basis_pct: Option<f32>,
     pub text_align: TextAlign,
     pub overflow: Overflow,
     pub wrap: bool,
@@ -140,6 +145,10 @@ impl RenderStyle {
         let (border_w, border_c) = style_value(node, &["border"])
             .and_then(parse_border_shorthand)
             .unwrap_or((None, None));
+
+        let (flex_grow_sh, flex_shrink_sh, flex_basis_sh, flex_basis_pct_sh) = style_text(node, &["flex"])
+            .and_then(parse_flex_shorthand)
+            .unwrap_or((None, None, None, None));
 
         Self {
             text_color: style_color(node, &["color"]),
@@ -180,9 +189,15 @@ impl RenderStyle {
                 AlignMode::Stretch,
                 |raw| parse_align(raw).unwrap_or(AlignMode::Start),
             ),
+            align_self: style_text(node, &["align-self", "alignSelf"]).and_then(parse_align),
             justify: style_text(node, &["justify-content", "justifyContent"])
                 .and_then(parse_justify)
                 .unwrap_or(JustifyMode::Start),
+            flex_grow: style_number(node, &["flex-grow", "flexGrow"]).or(flex_grow_sh),
+            flex_shrink: style_number(node, &["flex-shrink", "flexShrink"]).or(flex_shrink_sh),
+            flex_basis: style_len(node, &["flex-basis", "flexBasis"]).or(flex_basis_sh),
+            flex_basis_pct: style_len_percent(node, &["flex-basis", "flexBasis"])
+                .or(flex_basis_pct_sh),
             text_align: style_text(node, &["text-align", "textAlign"])
                 .and_then(parse_text_align)
                 .unwrap_or(TextAlign::Start),
@@ -453,6 +468,53 @@ fn parse_justify(raw: &str) -> Option<JustifyMode> {
         "space-between" | "space-around" | "space-evenly" => Some(JustifyMode::Space),
         _ => None,
     }
+}
+
+fn parse_flex_shorthand(raw: &str) -> Option<(Option<f32>, Option<f32>, Option<f32>, Option<f32>)> {
+    let text = normalize(raw);
+    if text.is_empty() {
+        return None;
+    }
+    if text == "none" {
+        return Some((Some(0.0), Some(0.0), None, None));
+    }
+    if text == "auto" {
+        return Some((Some(1.0), Some(1.0), None, None));
+    }
+
+    let parts: Vec<&str> = text.split_whitespace().collect();
+    if parts.is_empty() {
+        return None;
+    }
+
+    if parts.len() == 1 {
+        if let Ok(grow) = parts[0].parse::<f32>() {
+            return Some((Some(grow), Some(1.0), None, Some(0.0)));
+        }
+        return parse_flex_basis_token(parts[0]).map(|(basis, basis_pct)| (None, None, basis, basis_pct));
+    }
+
+    let grow = parts[0].parse::<f32>().ok();
+    let shrink = parts[1].parse::<f32>().ok();
+    let (basis, basis_pct) = if parts.len() >= 3 {
+        parse_flex_basis_token(parts[2]).unwrap_or((None, None))
+    } else {
+        (None, None)
+    };
+    Some((grow, shrink, basis, basis_pct))
+}
+
+fn parse_flex_basis_token(raw: &str) -> Option<(Option<f32>, Option<f32>)> {
+    if raw == "auto" || raw == "content" {
+        return Some((None, None));
+    }
+    if let Some(px) = parse_len_string_px(raw) {
+        return Some((Some(px), None));
+    }
+    if let Some(pct) = parse_len_string_percent(raw) {
+        return Some((None, Some(pct)));
+    }
+    None
 }
 
 fn parse_text_align(raw: &str) -> Option<TextAlign> {

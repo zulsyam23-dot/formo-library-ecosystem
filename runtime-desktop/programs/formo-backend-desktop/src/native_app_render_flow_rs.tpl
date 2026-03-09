@@ -4,7 +4,8 @@ use eframe::egui::{self, Color32, RichText};
 use serde_json::Value as JsonValue;
 
 use super::shared::{
-    apply_gap, apply_text_style, layout_from_style, show_text, with_style_container, FrameDefaults,
+    apply_gap, apply_text_style, layout_from_style, resolve_length, show_text, with_style_container,
+    FrameDefaults,
 };
 use super::state::{derive_for_item_key, prop_bool, prop_literal_string, prop_string, prop_usize};
 use super::{render_tree_scoped, ActionLog, NativeState, RenderScope};
@@ -37,16 +38,12 @@ pub(super) fn render_flex(
         if should_scroll {
             egui::ScrollArea::both().show(ui, |ui| {
                 ui.with_layout(layout, |ui| {
-                    for child in &node.children {
-                        render_tree_scoped(ui, child, state, action_log, scope);
-                    }
+                    render_flex_children(ui, &node.children, flow, style, state, action_log, scope);
                 });
             });
         } else {
             ui.with_layout(layout, |ui| {
-                for child in &node.children {
-                    render_tree_scoped(ui, child, state, action_log, scope);
-                }
+                render_flex_children(ui, &node.children, flow, style, state, action_log, scope);
             });
         }
     });
@@ -80,9 +77,7 @@ pub(super) fn render_scroll(
                 let flow = style.flow.unwrap_or(Flow::Column);
                 let layout = layout_from_style(flow, style);
                 ui.with_layout(layout, |ui| {
-                    for child in &node.children {
-                        render_tree_scoped(ui, child, state, action_log, scope);
-                    }
+                    render_flex_children(ui, &node.children, flow, style, state, action_log, scope);
                 });
             } else {
                 for child in &node.children {
@@ -91,6 +86,96 @@ pub(super) fn render_scroll(
             }
         });
     });
+}
+
+fn render_flex_children(
+    ui: &mut egui::Ui,
+    children: &[NativeNode],
+    flow: Flow,
+    parent_style: RenderStyle,
+    state: &mut NativeState,
+    action_log: &mut ActionLog,
+    scope: &RenderScope,
+) {
+    if children.is_empty() {
+        return;
+    }
+
+    let child_styles: Vec<RenderStyle> = children.iter().map(RenderStyle::from_node).collect();
+    let available = ui.available_size_before_wrap();
+    let main_available = match flow {
+        Flow::Row => available.x,
+        Flow::Column => available.y,
+    };
+    let gap = parent_style.gap.unwrap_or(8.0).max(0.0);
+    let gap_total = gap * (children.len().saturating_sub(1) as f32);
+
+    let mut base_sizes = vec![None; children.len()];
+    let mut grow_sum = 0.0f32;
+    let mut fixed_total = 0.0f32;
+
+    if main_available.is_finite() && main_available > 0.0 {
+        for (idx, child_style) in child_styles.iter().enumerate() {
+            let basis = child_main_basis(*child_style, flow, main_available);
+            base_sizes[idx] = basis;
+            if let Some(v) = basis {
+                fixed_total += v.max(0.0);
+            } else {
+                grow_sum += child_style.flex_grow.unwrap_or(0.0).max(0.0);
+            }
+        }
+    }
+
+    let remaining = (main_available - fixed_total - gap_total).max(0.0);
+    for (idx, child) in children.iter().enumerate() {
+        let child_style = child_styles[idx];
+        let mut assigned_main = base_sizes[idx];
+        if assigned_main.is_none() && grow_sum > 0.0 {
+            let grow = child_style.flex_grow.unwrap_or(0.0).max(0.0);
+            if grow > 0.0 {
+                assigned_main = Some((remaining * (grow / grow_sum)).max(0.0));
+            }
+        }
+
+        if let Some(v) = assigned_main {
+            ui.scope(|ui| {
+                match flow {
+                    Flow::Row => ui.set_width(v),
+                    Flow::Column => ui.set_height(v),
+                }
+                render_tree_scoped(ui, child, state, action_log, scope);
+            });
+        } else {
+            render_tree_scoped(ui, child, state, action_log, scope);
+        }
+    }
+}
+
+fn child_main_basis(style: RenderStyle, flow: Flow, parent_main: f32) -> Option<f32> {
+    match flow {
+        Flow::Row => resolve_length(
+            style
+                .width
+                .or(style.min_width)
+                .or(style.flex_basis),
+            style
+                .width_pct
+                .or(style.min_width_pct)
+                .or(style.flex_basis_pct),
+            parent_main,
+        ),
+        Flow::Column => resolve_length(
+            style
+                .height
+                .or(style.min_height)
+                .or(style.flex_basis),
+            style
+                .height_pct
+                .or(style.min_height_pct)
+                .or(style.flex_basis_pct),
+            parent_main,
+        ),
+    }
 }
 
 pub(super) fn render_frame_container(
@@ -237,6 +322,9 @@ fn is_inline_text_candidate(node: &NativeNode) -> bool {
         && style.max_width_pct.is_none()
         && style.max_height.is_none()
         && style.max_height_pct.is_none()
+        && style.flex_grow.unwrap_or(0.0) <= 0.0
+        && style.flex_basis.is_none()
+        && style.flex_basis_pct.is_none()
         && !style.display_flex
 }
 

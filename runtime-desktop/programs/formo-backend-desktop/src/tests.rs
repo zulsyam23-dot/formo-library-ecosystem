@@ -259,6 +259,9 @@ fn native_scaffold_uses_egui_and_embeds_bundle_path() {
     assert!(style_rs.contains("fn parse_rgb_color("));
     assert!(style_rs.contains("fn parse_font_weight("));
     assert!(style_rs.contains("fn parse_len_px("));
+    assert!(style_rs.contains("fn parse_flex_shorthand("));
+    assert!(style_rs.contains("pub flex_grow: Option<f32>"));
+    assert!(style_rs.contains("pub flex_basis: Option<f32>"));
     assert!(style_rs.contains("fn parse_box_shadow("));
     assert!(style_rs.contains("fn parse_border_shorthand("));
     assert!(style_rs.contains("map_or("));
@@ -285,6 +288,8 @@ fn native_scaffold_uses_egui_and_embeds_bundle_path() {
     assert!(render_state_rs.contains("fn prop_usize("));
     assert!(render_flow_rs.contains("fn render_block("));
     assert!(render_flow_rs.contains("fn render_scroll("));
+    assert!(render_flow_rs.contains("fn render_flex_children("));
+    assert!(render_flow_rs.contains("fn child_main_basis("));
     assert!(render_flow_rs.contains("apply_gap(ui, style.gap, None);"));
     assert!(render_flow_rs.contains("fn render_if("));
     assert!(render_flow_rs.contains("fn render_for("));
