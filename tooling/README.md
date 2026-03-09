@@ -10,6 +10,7 @@
 - command quality: `fmt`, `bench`
 - mode `watch` dan payload `lsp`
 - strict parity gate lintas target (`--strict-parity`)
+- strict engine gate lintas standar `FM/FS/FL` (`--strict-engine`)
 
 ## Apa yang Tidak Ditangani
 
@@ -51,12 +52,15 @@ cargo run -p formo-cli -- check --input main.fm
 cargo run -p formo-cli -- diagnose --input main.fm --json-pretty
 cargo run -p formo-cli -- build --target multi --input main.fm --out dist
 cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --strict-parity
+cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --strict-engine
 ```
 
 Catatan strict parity:
 
 - `--strict-parity` berlaku di target `web`, `desktop`, dan `multi`.
 - Pada target `web`, CLI menjalankan audit parity desktop (jika feature `backend-desktop` aktif) dan dapat menulis `desktop.parity.json`.
+- `--strict-engine` berlaku di target `web`, `desktop`, dan `multi`.
+- build akan selalu menulis `engine.bridge.json` berisi audit standar `FM/FS/FL`; dengan `--strict-engine`, warning bridge (`W770x`) membuat build gagal.
 
 ## Validasi Cepat
 

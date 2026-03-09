@@ -126,6 +126,22 @@ component App() {
     );
 }
 
+pub(crate) fn create_multifile_sample_with_logic(root: &Path) {
+    create_multifile_sample(root);
+    write_file(
+        root,
+        "logic/controllers/app_controller.fl",
+        r#"module AppController;
+
+logic AppController {
+  event startApp {
+    action emit "READY";
+  }
+}
+"#,
+    );
+}
+
 pub(crate) fn create_desktop_parity_gap_sample(root: &Path) {
     write_file(
         root,

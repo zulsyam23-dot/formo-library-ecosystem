@@ -24,6 +24,7 @@ pub struct BuildArgs {
     pub prod: bool,
     pub release_exe: bool,
     pub strict_parity: bool,
+    pub strict_engine: bool,
 }
 
 pub struct LspArgs {
@@ -69,7 +70,7 @@ pub fn print_help() {
     println!("  fmt [input|--input file] [--check] [--stdout]");
     println!("  doctor [input|--input file] [--json] [--json-pretty] [--json-schema]");
     println!(
-        "  build [--target web|desktop|multi] [--input file] [--out dir] [--watch] [--prod] [--release-exe] [--strict-parity]"
+        "  build [--target web|desktop|multi] [--input file] [--out dir] [--watch] [--prod] [--release-exe] [--strict-parity] [--strict-engine]"
     );
     println!(
         "    note: web/desktop target tersedia jika feature backend-web/backend-desktop aktif."
@@ -201,6 +202,7 @@ pub fn parse_build_args(args: &[String]) -> Result<BuildArgs, CliError> {
     let mut prod = false;
     let mut release_exe = false;
     let mut strict_parity = false;
+    let mut strict_engine = false;
 
     let mut i = 0;
     while i < args.len() {
@@ -238,6 +240,9 @@ pub fn parse_build_args(args: &[String]) -> Result<BuildArgs, CliError> {
             "--strict-parity" => {
                 strict_parity = true;
             }
+            "--strict-engine" => {
+                strict_engine = true;
+            }
             other => {
                 return Err(CliError::new(format!("unknown option: {other}")));
             }
@@ -253,6 +258,7 @@ pub fn parse_build_args(args: &[String]) -> Result<BuildArgs, CliError> {
         prod,
         release_exe,
         strict_parity,
+        strict_engine,
     })
 }
 
@@ -521,6 +527,7 @@ mod tests {
         assert_eq!(parsed.out_dir, "dist-desktop");
         assert!(parsed.release_exe);
         assert!(!parsed.strict_parity);
+        assert!(!parsed.strict_engine);
     }
 
     #[test]
@@ -528,6 +535,7 @@ mod tests {
         let parsed = parse_build_args(&[]).expect("build args should parse");
         assert!(!parsed.release_exe);
         assert!(!parsed.strict_parity);
+        assert!(!parsed.strict_engine);
     }
 
     #[test]
@@ -540,6 +548,20 @@ mod tests {
         let parsed = parse_build_args(&args).expect("build args should parse");
         assert_eq!(parsed.target, "multi");
         assert!(parsed.strict_parity);
+        assert!(!parsed.strict_engine);
+    }
+
+    #[test]
+    fn parse_build_args_reads_strict_engine_flag() {
+        let args = vec![
+            "--target".to_string(),
+            "web".to_string(),
+            "--strict-engine".to_string(),
+        ];
+        let parsed = parse_build_args(&args).expect("build args should parse");
+        assert_eq!(parsed.target, "web");
+        assert!(parsed.strict_engine);
+        assert!(!parsed.strict_parity);
     }
 
     #[test]

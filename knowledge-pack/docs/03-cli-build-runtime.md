@@ -222,6 +222,7 @@ Opsi:
 - `--release-exe` (khusus `desktop`/`multi`)
 - `--strict-parity` (berlaku untuk `web|desktop|multi`, build gagal jika ada parity warning desktop)
   - pada target `web`, audit parity desktop membutuhkan feature `backend-desktop`
+- `--strict-engine` (berlaku untuk `web|desktop|multi`, build gagal jika audit bridge `FM/FS/FL` masih ada warning)
 
 ## 9) `bench`
 
@@ -255,6 +256,7 @@ Opsi penting:
 - `runtime/README.md`
 - `runtime/app/*.js` (source runtime terpecah untuk readability)
 - `desktop.parity.json` (opsional; muncul jika `--strict-parity` pada target web menemukan warning parity desktop)
+- `engine.bridge.json` (selalu ada; manifest audit standar `FM/FS/FL`)
 
 ### Desktop Native
 
@@ -279,9 +281,10 @@ Opsi penting:
 3. `cargo run -p formo-cli -- diagnose --input main.fm --json`
 4. `cargo run -p formo-cli -- logic --input logic/controllers/app_controller.fl --json-pretty --rt-manifest-out dist-ci/runtime/logic.manifest.json`
 5. `cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --prod --strict-parity`
-6. `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --prod --strict-parity`
-7. desktop release opsional: `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --release-exe`
-8. `cargo run -p formo-cli -- bench --input main.fm --iterations 20 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --max-compile-p95-ms 80 --max-first-render-p95-ms 60`
+6. `cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --prod --strict-engine`
+7. `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --prod --strict-parity --strict-engine`
+8. desktop release opsional: `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --release-exe`
+9. `cargo run -p formo-cli -- bench --input main.fm --iterations 20 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --max-compile-p95-ms 80 --max-first-render-p95-ms 60`
 
 ## 12) Baseline Engine FM/FL/FS
 

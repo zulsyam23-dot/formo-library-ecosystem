@@ -2,6 +2,7 @@ mod args;
 mod benchmark;
 mod diagnose;
 mod doctor;
+mod engine_bridge;
 mod error;
 mod fmt_cmd;
 mod json_output;
@@ -17,6 +18,7 @@ use args::{
     parse_benchmark_args, parse_build_args, parse_check_args, parse_doctor_args, parse_fmt_args,
     parse_logic_args, parse_lsp_args, print_help,
 };
+use engine_bridge::collect_engine_bridge_report;
 use error::CliError;
 use json_output::{
     attach_schema_if_enabled, build_error_meta, classify_error_stage, emit_json,
@@ -261,6 +263,27 @@ fn write_json_manifest(path: &str, payload: &serde_json::Value) -> Result<(), Cl
     Ok(())
 }
 
+fn write_engine_bridge_manifest(
+    target: &str,
+    out_dir: &str,
+    payload: &serde_json::Value,
+) -> Result<Vec<String>, CliError> {
+    let mut paths = Vec::new();
+    let root_path = format!("{out_dir}/engine.bridge.json");
+    write_json_manifest(&root_path, payload)?;
+    paths.push(root_path);
+
+    if target == "multi" {
+        for suffix in ["web/engine.bridge.json", "desktop/engine.bridge.json"] {
+            let path = format!("{out_dir}/{suffix}");
+            write_json_manifest(&path, payload)?;
+            paths.push(path);
+        }
+    }
+
+    Ok(paths)
+}
+
 fn run_check(raw_args: &[String]) -> Result<(), CliError> {
     let check_args = parse_check_args(raw_args)?;
     if check_args.lsp {
@@ -340,6 +363,12 @@ fn run_build_once(build_args: &args::BuildArgs) -> Result<(), CliError> {
         build_args.prod,
         build_args.strict_parity,
     )?;
+    let bridge_report = collect_engine_bridge_report(&build_args.input, &ir);
+    let bridge_paths = write_engine_bridge_manifest(
+        &build_args.target,
+        &build_args.out_dir,
+        &bridge_report.manifest,
+    )?;
     let mode = if build_args.prod {
         "production"
     } else {
@@ -349,6 +378,26 @@ fn run_build_once(build_args: &args::BuildArgs) -> Result<(), CliError> {
         "build ok: target={} out={} mode={}",
         build_args.target, build_args.out_dir, mode
     );
+    println!(
+        "engine bridge: profile=fm-fs-fl canonical-style={}/{} logic-status={} warnings={}",
+        bridge_report.canonical_style_count,
+        bridge_report.style_count,
+        bridge_report.logic_status,
+        bridge_report.warning_count
+    );
+    if let Some(ref logic_input) = bridge_report.logic_input {
+        println!("engine logic input: {logic_input}");
+    }
+    if let Some(path) = bridge_paths.first() {
+        println!("engine bridge manifest: {path}");
+    }
+    for diag in &bridge_report.diagnostics {
+        if let Some(file) = &diag.file {
+            println!("engine warning {}: {} ({})", diag.code, diag.message, file);
+        } else {
+            println!("engine warning {}: {}", diag.code, diag.message);
+        }
+    }
 
     if report.desktop_parity_warning_count > 0 {
         println!(
@@ -360,6 +409,13 @@ fn run_build_once(build_args: &args::BuildArgs) -> Result<(), CliError> {
         if let Some(ref path) = report.desktop_parity_diagnostics_path {
             println!("desktop parity details: {path}");
         }
+    }
+
+    if build_args.strict_engine && bridge_report.warning_count > 0 {
+        return Err(CliError::new(format!(
+            "E7700 strict engine failed: {} warning(s) found in FM/FS/FL bridge profile",
+            bridge_report.warning_count
+        )));
     }
 
     if build_args.strict_parity && report.desktop_parity_warning_count > 0 {

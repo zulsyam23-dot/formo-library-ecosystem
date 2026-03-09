@@ -204,7 +204,8 @@ fn build_web_and_desktop_share_canonical_style_semantics() {
 
     let native_raw = fs::read_to_string(workspace.path().join("dist-desktop/app.native.json"))
         .expect("expected desktop native json output");
-    let native: Value = serde_json::from_str(&native_raw).expect("desktop native json should parse");
+    let native: Value =
+        serde_json::from_str(&native_raw).expect("desktop native json should parse");
     let root = &native["components"][0]["rootNode"];
     let row = find_widget_node(root, "Row").expect("expected Row node in desktop native json");
     assert_eq!(
@@ -216,6 +217,40 @@ fn build_web_and_desktop_share_canonical_style_semantics() {
         row["resolvedStyle"]["justify-content"]["v"],
         Value::String("space-between".to_string()),
         "desktop resolved style should use canonical justify-content value"
+    );
+}
+
+#[test]
+fn build_web_writes_engine_bridge_manifest() {
+    let workspace = TempWorkspace::new("formo_cli_build_engine_manifest");
+    create_multifile_sample(workspace.path());
+
+    let output = run_formo(
+        workspace.path(),
+        &[
+            "build", "--target", "web", "--input", "main.fm", "--out", "dist-web",
+        ],
+    );
+    assert!(
+        output.status.success(),
+        "expected web build success, stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let manifest_path = workspace.path().join("dist-web/engine.bridge.json");
+    assert!(
+        manifest_path.exists(),
+        "expected engine bridge manifest to exist"
+    );
+    let raw = fs::read_to_string(manifest_path).expect("engine bridge manifest should be readable");
+    let manifest: Value = serde_json::from_str(&raw).expect("engine bridge manifest should parse");
+    assert_eq!(
+        manifest["engineProfile"]["id"],
+        Value::String("fm-fs-fl-bridge".to_string())
+    );
+    assert_eq!(
+        manifest["standard"]["fs"]["canonicalCoveragePct"],
+        Value::from(100.0)
     );
 }
 
@@ -306,7 +341,10 @@ fn build_web_strict_parity_fails_when_desktop_parity_gap_exists() {
         "expected strict parity error in stderr, got: {stderr}"
     );
     assert!(
-        workspace.path().join("dist-web/desktop.parity.json").exists(),
+        workspace
+            .path()
+            .join("dist-web/desktop.parity.json")
+            .exists(),
         "expected parity report file for failed strict parity web build"
     );
 }
@@ -341,8 +379,95 @@ fn build_web_strict_parity_passes_when_desktop_parity_is_clean() {
         "expected web artifacts on strict parity success"
     );
     assert!(
-        !workspace.path().join("dist-web/desktop.parity.json").exists(),
+        !workspace
+            .path()
+            .join("dist-web/desktop.parity.json")
+            .exists(),
         "did not expect parity report file when there is no parity warning"
+    );
+}
+
+#[test]
+fn build_web_strict_engine_fails_when_logic_bridge_missing() {
+    let workspace = TempWorkspace::new("formo_cli_build_web_strict_engine_fail");
+    create_multifile_sample(workspace.path());
+
+    let output = run_formo(
+        workspace.path(),
+        &[
+            "build",
+            "--target",
+            "web",
+            "--input",
+            "main.fm",
+            "--out",
+            "dist-web",
+            "--strict-engine",
+        ],
+    );
+    assert!(
+        !output.status.success(),
+        "expected strict engine failure, stdout={}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("E7700 strict engine failed"),
+        "expected strict engine error in stderr, got: {stderr}"
+    );
+    let manifest_path = workspace.path().join("dist-web/engine.bridge.json");
+    assert!(
+        manifest_path.exists(),
+        "engine bridge manifest should still be emitted on strict engine failure"
+    );
+    let raw = fs::read_to_string(manifest_path).expect("manifest should be readable");
+    let manifest: Value = serde_json::from_str(&raw).expect("manifest should parse");
+    let diagnostics = manifest["diagnostics"]
+        .as_array()
+        .expect("diagnostics should be array");
+    assert!(
+        diagnostics
+            .iter()
+            .any(|diag| diag["code"] == Value::String("W7701".to_string())),
+        "expected W7701 diagnostic for missing logic bridge"
+    );
+}
+
+#[test]
+fn build_web_strict_engine_passes_when_logic_bridge_is_ready() {
+    let workspace = TempWorkspace::new("formo_cli_build_web_strict_engine_pass");
+    create_multifile_sample_with_logic(workspace.path());
+
+    let output = run_formo(
+        workspace.path(),
+        &[
+            "build",
+            "--target",
+            "web",
+            "--input",
+            "main.fm",
+            "--out",
+            "dist-web",
+            "--strict-engine",
+        ],
+    );
+    assert!(
+        output.status.success(),
+        "expected strict engine success, stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let raw = fs::read_to_string(workspace.path().join("dist-web/engine.bridge.json"))
+        .expect("manifest should be readable");
+    let manifest: Value = serde_json::from_str(&raw).expect("manifest should parse");
+    assert_eq!(
+        manifest["standard"]["fl"]["status"],
+        Value::String("ok".to_string())
+    );
+    assert_eq!(
+        manifest["warningCount"],
+        Value::from(0),
+        "strict engine passing sample should have zero warnings"
     );
 }
 
