@@ -226,11 +226,17 @@ fn is_inline_text_candidate(node: &NativeNode) -> bool {
         && style.border_radius.is_none()
         && style.shadow.is_none()
         && style.width.is_none()
+        && style.width_pct.is_none()
         && style.height.is_none()
+        && style.height_pct.is_none()
         && style.min_width.is_none()
+        && style.min_width_pct.is_none()
         && style.min_height.is_none()
+        && style.min_height_pct.is_none()
         && style.max_width.is_none()
+        && style.max_width_pct.is_none()
         && style.max_height.is_none()
+        && style.max_height_pct.is_none()
         && !style.display_flex
 }
 

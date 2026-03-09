@@ -84,11 +84,17 @@ pub struct RenderStyle {
     pub italic: bool,
     pub line_height: Option<f32>,
     pub width: Option<f32>,
+    pub width_pct: Option<f32>,
     pub height: Option<f32>,
+    pub height_pct: Option<f32>,
     pub min_width: Option<f32>,
+    pub min_width_pct: Option<f32>,
     pub min_height: Option<f32>,
+    pub min_height_pct: Option<f32>,
     pub max_width: Option<f32>,
+    pub max_width_pct: Option<f32>,
     pub max_height: Option<f32>,
+    pub max_height_pct: Option<f32>,
     pub padding: Edges,
     pub has_padding: bool,
     pub margin: Edges,
@@ -154,11 +160,17 @@ impl RenderStyle {
                 .unwrap_or(false),
             line_height: style_number(node, &["line-height", "lineHeight"]),
             width: style_len(node, &["width"]),
+            width_pct: style_len_percent(node, &["width"]),
             height: style_len(node, &["height"]),
+            height_pct: style_len_percent(node, &["height"]),
             min_width: style_len(node, &["min-width", "minWidth"]),
+            min_width_pct: style_len_percent(node, &["min-width", "minWidth"]),
             min_height: style_len(node, &["min-height", "minHeight"]),
+            min_height_pct: style_len_percent(node, &["min-height", "minHeight"]),
             max_width: style_len(node, &["max-width", "maxWidth"]),
+            max_width_pct: style_len_percent(node, &["max-width", "maxWidth"]),
             max_height: style_len(node, &["max-height", "maxHeight"]),
+            max_height_pct: style_len_percent(node, &["max-height", "maxHeight"]),
             padding,
             has_padding,
             margin,
@@ -246,6 +258,10 @@ fn style_len(node: &NativeNode, keys: &[&str]) -> Option<f32> {
     style_value(node, keys).and_then(parse_len_px)
 }
 
+fn style_len_percent(node: &NativeNode, keys: &[&str]) -> Option<f32> {
+    style_value(node, keys).and_then(parse_len_percent)
+}
+
 fn style_edges(node: &NativeNode, key: &str) -> (Edges, bool) {
     if let Some(v) = style_value(node, &[key]).and_then(parse_edges) {
         return (v, true);
@@ -288,6 +304,23 @@ fn parse_len_px(value: &FormoValue) -> Option<f32> {
     value.v.as_str().and_then(parse_len_string_px)
 }
 
+fn parse_len_percent(value: &FormoValue) -> Option<f32> {
+    if let Some(obj) = value.v.as_object() {
+        let raw = obj.get("value")?.as_f64()? as f32;
+        let unit = obj
+            .get("unit")
+            .and_then(|u| u.as_str())
+            .unwrap_or("%")
+            .trim()
+            .to_ascii_lowercase();
+        return match unit.as_str() {
+            "%" | "percent" | "pct" => Some(raw),
+            _ => None,
+        };
+    }
+    value.v.as_str().and_then(parse_len_string_percent)
+}
+
 fn parse_len_string_px(raw: &str) -> Option<f32> {
     let text = raw.trim();
     if let Some(px) = text.strip_suffix("px") {
@@ -297,6 +330,12 @@ fn parse_len_string_px(raw: &str) -> Option<f32> {
         return dp.trim().parse::<f32>().ok();
     }
     text.parse::<f32>().ok()
+}
+
+fn parse_len_string_percent(raw: &str) -> Option<f32> {
+    let text = raw.trim();
+    let pct = text.strip_suffix('%')?;
+    pct.trim().parse::<f32>().ok()
 }
 
 fn parse_edges(value: &FormoValue) -> Option<Edges> {

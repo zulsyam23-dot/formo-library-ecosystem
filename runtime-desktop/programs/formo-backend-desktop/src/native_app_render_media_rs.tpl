@@ -4,7 +4,7 @@ use eframe::egui::{self, Color32, RichText};
 use serde_json::Value as JsonValue;
 
 use super::shared::{
-    apply_gap, apply_text_style, show_text, with_style_container, FrameDefaults,
+    apply_gap, apply_text_style, resolve_length, show_text, with_style_container, FrameDefaults,
 };
 use super::state::{
     emit_action, prop_len, prop_string, read_state_bool,
@@ -37,14 +37,19 @@ pub(super) fn render_image(
     mut style: RenderStyle,
     scope: &RenderScope,
 ) {
-    if style.width.is_none() {
+    if style.width.is_none() && style.width_pct.is_none() {
         style.width = prop_len(node, "width", scope);
     }
-    if style.height.is_none() {
+    if style.height.is_none() && style.height_pct.is_none() {
         style.height = prop_len(node, "height", scope);
     }
-    let width = style.width.unwrap_or(160.0).max(0.0);
-    let height = style.height.unwrap_or(96.0).max(0.0);
+    let available = ui.available_size_before_wrap();
+    let width = resolve_length(style.width, style.width_pct, available.x)
+        .unwrap_or(160.0)
+        .max(0.0);
+    let height = resolve_length(style.height, style.height_pct, available.y)
+        .unwrap_or(96.0)
+        .max(0.0);
     let alt = prop_string(node, "alt", scope).unwrap_or_else(|| "Image".to_string());
     let src = prop_string(node, "src", scope).unwrap_or_default();
 
@@ -88,9 +93,10 @@ pub(super) fn render_spacer(
     style: RenderStyle,
     scope: &RenderScope,
 ) {
+    let available = ui.available_size_before_wrap();
     let size = prop_len(node, "size", scope)
-        .or(style.width)
-        .or(style.height)
+        .or_else(|| resolve_length(style.width, style.width_pct, available.x))
+        .or_else(|| resolve_length(style.height, style.height_pct, available.y))
         .unwrap_or(8.0)
         .max(0.0);
     with_style_container(ui, style, FrameDefaults::default(), |ui| {
@@ -122,7 +128,10 @@ pub(super) fn render_modal(
     let focus_state_key = format!("__modal_focused::{}", node.id);
     let max_modal_width = (screen_rect.width() * 0.9).max(280.0);
     let max_modal_height = (screen_rect.height() * 0.8).max(160.0);
-    let preferred_width = style.width.unwrap_or(360.0).max(280.0).min(max_modal_width);
+    let preferred_width = resolve_length(style.width, style.width_pct, screen_rect.width())
+        .unwrap_or(360.0)
+        .max(280.0)
+        .min(max_modal_width);
 
     let backdrop_layer =
         egui::LayerId::new(egui::Order::Foreground, egui::Id::new(format!("{modal_id}-backdrop")));

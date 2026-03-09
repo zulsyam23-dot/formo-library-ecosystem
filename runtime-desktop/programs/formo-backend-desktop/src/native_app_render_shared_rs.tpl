@@ -91,24 +91,35 @@ fn frame_from_style(style: RenderStyle, defaults: FrameDefaults) -> Option<egui:
 }
 
 fn apply_size(ui: &mut egui::Ui, style: RenderStyle) {
-    if let Some(v) = style.min_width {
+    let available = ui.available_size_before_wrap();
+    if let Some(v) = resolve_length(style.min_width, style.min_width_pct, available.x) {
         ui.set_min_width(v.max(0.0));
     }
-    if let Some(v) = style.min_height {
+    if let Some(v) = resolve_length(style.min_height, style.min_height_pct, available.y) {
         ui.set_min_height(v.max(0.0));
     }
-    if let Some(v) = style.max_width {
+    if let Some(v) = resolve_length(style.max_width, style.max_width_pct, available.x) {
         ui.set_max_width(v.max(0.0));
     }
-    if let Some(v) = style.max_height {
+    if let Some(v) = resolve_length(style.max_height, style.max_height_pct, available.y) {
         ui.set_max_height(v.max(0.0));
     }
-    if let Some(v) = style.width {
+    if let Some(v) = resolve_length(style.width, style.width_pct, available.x) {
         ui.set_width(v.max(0.0));
     }
-    if let Some(v) = style.height {
+    if let Some(v) = resolve_length(style.height, style.height_pct, available.y) {
         ui.set_height(v.max(0.0));
     }
+}
+
+pub(super) fn resolve_length(px: Option<f32>, pct: Option<f32>, base: f32) -> Option<f32> {
+    if let Some(v) = px {
+        return Some(v);
+    }
+    if !base.is_finite() {
+        return None;
+    }
+    pct.map(|p| (base * (p / 100.0)).max(0.0))
 }
 
 pub(super) fn apply_gap(ui: &mut egui::Ui, gap: Option<f32>, default_gap: Option<f32>) {
@@ -131,8 +142,11 @@ pub(super) fn layout_from_style(flow: Flow, style: RenderStyle) -> egui::Layout 
         Flow::Row => {
             style.align == AlignMode::Stretch
                 && (style.height.is_some()
+                    || style.height_pct.is_some()
                     || style.min_height.is_some()
-                    || style.max_height.is_some())
+                    || style.min_height_pct.is_some()
+                    || style.max_height.is_some()
+                    || style.max_height_pct.is_some())
         }
     };
     let mut layout = match flow {

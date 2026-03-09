@@ -3,7 +3,7 @@ use crate::style::{parse_hex_color, Edges, RenderStyle};
 use eframe::egui::{self, RichText};
 use serde_json::Value as JsonValue;
 
-use super::shared::{apply_gap, apply_text_style, with_style_container, FrameDefaults};
+use super::shared::{apply_gap, apply_text_style, resolve_length, with_style_container, FrameDefaults};
 use super::state::{
     emit_action, prop_bool, prop_string, read_state_bool, read_state_string,
 };
@@ -45,7 +45,14 @@ pub(super) fn render_button(
 
     let response = ui
         .add_enabled_ui(!disabled, |ui| {
-            match (style.width.or(style.min_width), style.height) {
+            let available = ui.available_size_before_wrap();
+            let width = resolve_length(
+                style.width.or(style.min_width),
+                style.width_pct.or(style.min_width_pct),
+                available.x,
+            );
+            let height = resolve_length(style.height, style.height_pct, available.y);
+            match (width, height) {
                 (Some(w), Some(h)) => ui.add_sized([w.max(0.0), h.max(0.0)], button),
                 (Some(w), None) => ui.add_sized([w.max(0.0), ui.spacing().interact_size.y], button),
                 (None, Some(h)) => ui.add_sized([ui.spacing().interact_size.x, h.max(0.0)], button),
@@ -112,7 +119,15 @@ pub(super) fn render_input(
             }
 
             let placeholder = prop_string(node, "placeholder", scope).unwrap_or_default();
-            let width = style.width.or(style.min_width).unwrap_or(220.0).max(0.0);
+            let available = ui.available_size_before_wrap();
+            let width = resolve_length(
+                style.width.or(style.min_width),
+                style.width_pct.or(style.min_width_pct),
+                available.x,
+            )
+            .unwrap_or(220.0)
+            .max(0.0);
+            let height = resolve_length(style.height, style.height_pct, available.y);
             let response = ui
                 .add_enabled_ui(!disabled, |ui| {
                     let mut edit = egui::TextEdit::singleline(&mut text).frame(false);
@@ -123,7 +138,7 @@ pub(super) fn render_input(
                         edit = edit.password(true);
                     }
 
-                    if let Some(height) = style.height {
+                    if let Some(height) = height {
                         ui.add_sized([width, height.max(0.0)], edit)
                     } else {
                         ui.add_sized([width, ui.spacing().interact_size.y], edit)
