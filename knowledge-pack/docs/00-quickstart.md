@@ -96,6 +96,8 @@ Artifact umum:
 - `dist-web/index.html`
 - `dist-web/app.js`
 - `dist-web/app.css`
+- `dist-web/runtime/app/50_actions_state.js` (runtime state/action; berisi handler FL generated jika logic bridge tersedia)
+- `dist-web/engine.bridge.json` (manifest audit standar `FM/FS/FL`)
 - `dist-web/desktop.parity.json` (opsional, hanya jika strict parity menemukan warning desktop)
 
 ## 7) Build Target Desktop Native
@@ -155,7 +157,8 @@ Cocok saat iterasi harian.
 2. `cargo run -p formo-cli -- check --input main.fm` untuk validasi cepat.
 3. `cargo run -p formo-cli -- diagnose --input main.fm --json` untuk integrasi tooling.
 4. `cargo run -p formo-cli -- build --target <web|desktop|multi> --input main.fm --out <output-dir>`.
-5. jika butuh konsistensi web/desktop, pakai `--strict-parity` dan pantau laporan parity.
+5. jika butuh konsistensi engine lintas standar, pakai `--strict-engine` dan cek `engine.bridge.json`.
+6. jika butuh konsistensi web/desktop, pakai `--strict-parity` dan pantau laporan parity.
 
 ## 12) Checklist Selesai Quickstart
 

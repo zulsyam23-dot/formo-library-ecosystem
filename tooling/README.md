@@ -11,6 +11,7 @@
 - mode `watch` dan payload `lsp`
 - strict parity gate lintas target (`--strict-parity`)
 - strict engine gate lintas standar `FM/FS/FL` (`--strict-engine`)
+- sinkronisasi script event FL ke runtime desktop (`native-app/src/actions.rs`) dan runtime web (`app.js`, `runtime/app/50_actions_state.js`)
 
 ## Apa yang Tidak Ditangani
 
@@ -61,6 +62,7 @@ Catatan strict parity:
 - Pada target `web`, CLI menjalankan audit parity desktop (jika feature `backend-desktop` aktif) dan dapat menulis `desktop.parity.json`.
 - `--strict-engine` berlaku di target `web`, `desktop`, dan `multi`.
 - build akan selalu menulis `engine.bridge.json` berisi audit standar `FM/FS/FL`; dengan `--strict-engine`, warning bridge (`W770x`) membuat build gagal.
+- untuk target `web|multi`, runtime JS hasil build akan mengandung `formoGeneratedActions` jika FL event script tersedia.
 
 ## Validasi Cepat
 

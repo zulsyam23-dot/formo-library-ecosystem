@@ -30,6 +30,7 @@ Daftar fitur runtime desktop Formo yang wajib tersedia di library ini.
 5. `desktop_host_actions`
    - Kontrak action host Rust via `FormoDesktopHost::invoke_action(...)`.
    - Scaffold `native-app/src/actions.rs` meng-generate registry handler berdasarkan action props yang terdeteksi dari IR (`onPress/onClick/onChange/onClose/action`).
+   - `native-app/src/actions.rs` menyediakan helper expression `eval_set_expression` dan `eval_set_expression_rpn` untuk menjaga parity eksekusi `action set` dengan runtime web.
 6. `desktop_state_bridge`
    - Helper state bridge Rust: `set_state_patch(...)` dan `replace_state(...)`.
 7. `ir_snapshot_emit`

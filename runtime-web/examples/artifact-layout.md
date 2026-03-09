@@ -14,4 +14,5 @@ Kontrak minimal:
 - `app.css` memuat style canonical hasil `effective_style_decls(...)` dari IR.
 - `app.js` memuat runtime DOM + state/action/control-flow.
 - `runtime/app/*.js` memuat source runtime yang sama dalam bentuk terpecah (readable).
+- `runtime/app/50_actions_state.js` memuat runtime action/state; jika FL tersedia, file ini berisi handler generated (`formoGeneratedActions`) dan evaluator `evalSetExpressionRpn(...)`.
 - `desktop.parity.json` dapat muncul saat build web dijalankan dengan `--strict-parity` dan audit desktop menemukan warning parity.

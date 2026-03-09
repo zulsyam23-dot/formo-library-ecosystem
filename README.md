@@ -42,6 +42,7 @@ Engine Formo sekarang memakai baseline lintas target berikut:
    - `canonicalDecls` (hasil normalisasi deterministik).
 5. Runtime web dan desktop sama-sama membaca style dari `formo_ir::effective_style_decls(...)`,
    sehingga perilaku style baseline tidak bergantung target.
+6. Build tooling menyinkronkan event FL ke runtime desktop (Rust) dan web (JS), termasuk evaluasi `action set` kompleks berbasis RPN agar perilaku logika lintas target konsisten.
 
 ## Workspace Crates (Aktif di Cargo.toml)
 

@@ -12,3 +12,6 @@ Catatan baseline engine:
 - CLI menulis `engine.bridge.json` pada output build untuk audit standar `FM/FS/FL`.
 - `build --strict-engine` memaksa warning bridge `W770x` menjadi fail-fast.
 - Warning `W7705` menandakan binding action di FM tidak punya event FL yang sesuai.
+- Pada target `desktop|multi`, sinkronisasi FL ditulis ke `native-app/src/actions.rs`.
+- Pada target `web|multi`, sinkronisasi FL ditulis ke `app.js` dan `runtime/app/50_actions_state.js`.
+- Expression `action set` kompleks diturunkan sebagai token RPN agar urutan evaluasi web/desktop tetap sama.

@@ -24,3 +24,4 @@ Catatan:
 
 - `--strict-parity` pada target `web` memerlukan feature `backend-desktop` untuk audit parity desktop.
 - setiap build menulis `engine.bridge.json`; gunakan `--strict-engine` untuk memaksa standar bridge `FM/FS/FL` tanpa warning.
+- jika FL tersedia, build target `web|multi` akan menyinkronkan handler ke `app.js` dan `runtime/app/50_actions_state.js`.

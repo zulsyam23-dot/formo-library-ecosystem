@@ -25,12 +25,14 @@ Update terakhir: 2026-03-09
 3. `runtime-web` (`active`)
    - Emitter web artifact + runtime state/action/control-flow dimigrasikan.
    - Emitter CSS sudah membaca `effective_style_decls` agar mengikuti canonical style engine.
+   - Build tooling sudah menyinkronkan event FL ke runtime web (`app.js` + `runtime/app/50_actions_state.js`) dengan evaluator `action set` berbasis RPN untuk parity logika web-desktop.
 4. `runtime-desktop` (`active`)
    - Bundle native Rust + scaffold GUI native + style parity core + bridge host desktop + IR snapshot dimigrasikan.
    - Renderer desktop sudah membaca `effective_style_decls` + hardening flex sizing (`flex/flex-grow/flex-shrink/flex-basis`) untuk parity web-desktop yang lebih stabil.
 5. `tooling` (`active`)
    - Command CLI utama, watch mode, benchmark, dan diagnostic output dimigrasikan.
    - `build --strict-parity` sudah berlaku untuk `web|desktop|multi` (target `web` melakukan audit parity desktop saat backend desktop tersedia).
+   - `build` sudah menyinkronkan script FL ke runtime desktop (`native-app/src/actions.rs`) dan runtime web (`app.js`, `runtime/app/50_actions_state.js`).
 6. `ai-interop` (`bootstrap`)
    - Kontrak AI profile + error envelope + capability exchange dimigrasikan sebagai baseline.
 7. `knowledge-pack` (`bootstrap`)

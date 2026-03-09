@@ -10,3 +10,5 @@ Ringkasan cepat:
 - `build --strict-parity` berlaku untuk target `web|desktop|multi`.
 - `build --strict` adalah preset untuk mengaktifkan `--strict-parity` + `--strict-engine`.
 - Untuk target `web`, strict parity menjalankan audit desktop dan bisa menghasilkan `desktop.parity.json`.
+- Build target `desktop|multi` menyinkronkan `native-app/src/actions.rs` dengan script event FL.
+- Build target `web|multi` menyinkronkan `app.js` dan `runtime/app/50_actions_state.js` dengan script event FL.

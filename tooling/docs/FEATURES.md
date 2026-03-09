@@ -21,7 +21,9 @@ Daftar fitur tooling Formo yang wajib tersedia di library ini.
    - `build --strict-engine` memaksa zero warning bridge (`W7701`..`W7705`) pada target `web`, `desktop`, maupun `multi`.
    - `W7705` dipakai saat action binding FM tidak punya event FL yang cocok.
    - Pada target `desktop|multi`, CLI menyinkronkan `native-app/src/actions.rs` dengan event FL (termasuk body handler global `set/call/emit` sebagai runtime scaffold awal).
+   - Pada target `web|multi`, CLI menyinkronkan `app.js` dan `runtime/app/50_actions_state.js` dengan event FL (handler JS generated + resolver fallback ke `window.formoActions`).
    - Mapping `action set` memakai metadata operand/operator FL; kasus langsung (`stateRef`/literal tunggal) dirender sebagai assignment state yang lebih presisi.
+   - Untuk expression kompleks `action set`, CLI menurunkan token RPN agar evaluator web (`evalSetExpressionRpn`) dan desktop (`eval_set_expression_rpn`) menjaga precedence operator + kurung secara identik.
 3. `watch_mode`
    - Watch mode untuk `check`, `diagnose`, dan `build`.
 4. `benchmark_mode`

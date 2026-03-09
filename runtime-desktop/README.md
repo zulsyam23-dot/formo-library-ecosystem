@@ -11,6 +11,7 @@
 - readable artifacts untuk inspeksi AI/manusia
 - bridge action/state untuk host desktop
 - auto-generate `native-app/src/actions.rs` dari action props IR
+- helper expression `action set` (`eval_set_expression` + `eval_set_expression_rpn`) tersedia di scaffold action untuk parity dengan runtime web
 - runtime style resolver canonical (`effective_style_decls`) agar baseline web/desktop konsisten
 - flex sizing parity phase-2 (`flex`, `flex-grow`, `flex-shrink`, `flex-basis`)
 

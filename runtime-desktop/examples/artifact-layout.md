@@ -7,25 +7,26 @@ Contoh artifact hasil build target desktop (native Rust):
 3. `app.ir.json`
 4. `native-app/Cargo.toml`
 5. `native-app/src/main.rs`
-6. `native-app/src/app.rs`
-7. `native-app/src/model.rs`
-8. `native-app/src/style.rs`
-9. `native-app/src/render/mod.rs`
-10. `native-app/src/render/flow.rs`
-11. `native-app/src/render/controls.rs`
-12. `native-app/src/render/media.rs`
-13. `native-app/src/render/shared.rs`
-14. `native-app/src/render/state.rs`
-15. `native-app/README.md`
-16. `readable/README.md`
-17. `readable/native/components.json`
-18. `readable/native/tokens.json`
-19. `readable/native/diagnostics.json`
-20. `readable/ir/components.json`
-21. `readable/ir/nodes.json`
-22. `readable/ir/styles.json`
-23. `readable/ir/tokens.json`
-24. `readable/ir/diagnostics.json`
+6. `native-app/src/actions.rs`
+7. `native-app/src/app.rs`
+8. `native-app/src/model.rs`
+9. `native-app/src/style.rs`
+10. `native-app/src/render/mod.rs`
+11. `native-app/src/render/flow.rs`
+12. `native-app/src/render/controls.rs`
+13. `native-app/src/render/media.rs`
+14. `native-app/src/render/shared.rs`
+15. `native-app/src/render/state.rs`
+16. `native-app/README.md`
+17. `readable/README.md`
+18. `readable/native/components.json`
+19. `readable/native/tokens.json`
+20. `readable/native/diagnostics.json`
+21. `readable/ir/components.json`
+22. `readable/ir/nodes.json`
+23. `readable/ir/styles.json`
+24. `readable/ir/tokens.json`
+25. `readable/ir/diagnostics.json`
 
 Kontrak minimal:
 
@@ -43,6 +44,7 @@ Kontrak minimal:
   - scope `For`: `alias`, `aliasIndex`, `aliasKey`
   - interaction `Modal`: close button, backdrop click, `Escape`
 - host action bridge: trait `FormoDesktopHost`.
+- `native-app/src/actions.rs` memuat registry action dan evaluator expression (`eval_set_expression`, `eval_set_expression_rpn`) untuk sinkronisasi event FL.
 - state bridge: `FormoDesktopState::set_state_patch(...)` dan `replace_state(...)`.
 - parity diagnostics: warning style/widget unsupported muncul di `app.native.json.diagnostics`.
 - folder `readable/` berisi snapshot JSON terpecah untuk audit manusia/AI.

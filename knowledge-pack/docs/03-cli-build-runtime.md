@@ -133,6 +133,7 @@ Validasi strict profile `logic`:
 - `action set` menolak mismatch literal dasar terhadap tipe field state (`bool/string/int/float`).
 - expression RHS `action set` wajib hanya mereferensikan state field yang terdaftar, dengan tipe operand kompatibel terhadap target field.
 - inferensi expression dasar (`+ - * / %`, `== != < <= > >=`, `&& ||`) digunakan untuk validasi tipe `action set`.
+- metadata expression `action set` diturunkan sebagai token RPN agar urutan precedence operator + kurung konsisten saat dieksekusi di runtime web maupun desktop.
 
 ## 4) `diagnose`
 
@@ -232,6 +233,8 @@ Opsi:
 - `--strict-parity` (berlaku untuk `web|desktop|multi`, build gagal jika ada parity warning desktop)
   - pada target `web`, audit parity desktop membutuhkan feature `backend-desktop`
 - `--strict-engine` (berlaku untuk `web|desktop|multi`, build gagal jika audit bridge `FM/FS/FL` masih ada warning)
+- pada target `desktop|multi`, CLI menyinkronkan script event FL ke `native-app/src/actions.rs`
+- pada target `web|multi`, CLI menyinkronkan script event FL ke `app.js` dan `runtime/app/50_actions_state.js`
 
 ## 9) `bench`
 
@@ -264,6 +267,7 @@ Opsi penting:
 - `app.css`
 - `runtime/README.md`
 - `runtime/app/*.js` (source runtime terpecah untuk readability)
+- `runtime/app/50_actions_state.js` (runtime state/action; memuat `formoGeneratedActions` jika FL bridge tersedia)
 - `desktop.parity.json` (opsional; muncul jika `--strict-parity` pada target web menemukan warning parity desktop)
 - `engine.bridge.json` (selalu ada; manifest audit standar `FM/FS/FL`)
 
@@ -304,4 +308,5 @@ Untuk memastikan output web/desktop setara:
 3. `FS` mendefinisikan style declarative.
 4. IR menyimpan style sebagai `decls` + `canonicalDecls`.
 5. Backend web dan desktop selalu membaca style via `effective_style_decls(...)`.
+6. Build tooling menurunkan event FL menjadi handler runtime desktop (Rust) dan web (JS), termasuk evaluator `action set` berbasis RPN untuk parity perilaku.
 
