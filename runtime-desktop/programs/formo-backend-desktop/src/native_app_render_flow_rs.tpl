@@ -190,23 +190,48 @@ fn render_document_flow_children(
 ) {
     let mut index = 0usize;
     while index < children.len() {
-        if children[index].widget == "Text" {
+        if is_inline_text_candidate(&children[index]) {
             let start = index;
-            while index < children.len() && children[index].widget == "Text" {
+            while index < children.len() && is_inline_text_candidate(&children[index]) {
                 index += 1;
             }
-            ui.horizontal_wrapped(|ui| {
-                ui.spacing_mut().item_spacing.x = 0.0;
-                for child in &children[start..index] {
-                    render_tree_scoped(ui, child, state, action_log, scope);
-                }
-            });
+            if index - start >= 2 {
+                ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().item_spacing.x = 0.0;
+                    for child in &children[start..index] {
+                        render_tree_scoped(ui, child, state, action_log, scope);
+                    }
+                });
+            } else {
+                render_tree_scoped(ui, &children[start], state, action_log, scope);
+            }
             continue;
         }
 
         render_tree_scoped(ui, &children[index], state, action_log, scope);
         index += 1;
     }
+}
+
+fn is_inline_text_candidate(node: &NativeNode) -> bool {
+    if node.widget != "Text" {
+        return false;
+    }
+    let style = RenderStyle::from_node(node);
+    !style.has_padding
+        && !style.has_margin
+        && style.background.is_none()
+        && style.border_color.is_none()
+        && style.border_width.is_none()
+        && style.border_radius.is_none()
+        && style.shadow.is_none()
+        && style.width.is_none()
+        && style.height.is_none()
+        && style.min_width.is_none()
+        && style.min_height.is_none()
+        && style.max_width.is_none()
+        && style.max_height.is_none()
+        && !style.display_flex
 }
 
 pub(super) fn render_if(

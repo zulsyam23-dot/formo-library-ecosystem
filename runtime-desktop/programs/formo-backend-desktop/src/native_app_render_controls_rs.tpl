@@ -49,7 +49,7 @@ pub(super) fn render_button(
                 (Some(w), Some(h)) => ui.add_sized([w.max(0.0), h.max(0.0)], button),
                 (Some(w), None) => ui.add_sized([w.max(0.0), ui.spacing().interact_size.y], button),
                 (None, Some(h)) => ui.add_sized([ui.spacing().interact_size.x, h.max(0.0)], button),
-                (None, None) => ui.add(button),
+                (None, None) => ui.horizontal(|ui| ui.add(button)).inner,
             }
         })
         .inner;
