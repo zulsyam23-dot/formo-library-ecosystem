@@ -259,6 +259,11 @@ fn native_scaffold_uses_egui_and_embeds_bundle_path() {
     assert!(style_rs.contains("fn parse_len_px("));
     assert!(style_rs.contains("fn parse_box_shadow("));
     assert!(style_rs.contains("fn parse_border_shorthand("));
+    assert!(style_rs.contains("map_or("));
+    assert!(style_rs.contains("parse_align(raw).unwrap_or(AlignMode::Start)"));
+    assert!(style_rs.contains("\"baseline\""));
+    assert!(style_rs.contains("\"self-start\""));
+    assert!(style_rs.contains("\"self-end\""));
     assert!(style_rs.contains("pub display_flex: bool"));
     assert!(render_mod_rs.contains("\"Checkbox\" =>"));
     assert!(render_mod_rs.contains("\"Switch\" =>"));
@@ -270,6 +275,8 @@ fn native_scaffold_uses_egui_and_embeds_bundle_path() {
     assert!(render_mod_rs.contains("flow::render_block("));
     assert!(render_mod_rs.contains("\"Scroll\" => flow::render_scroll("));
     assert!(render_shared_rs.contains("fn layout_from_style("));
+    assert!(render_shared_rs.contains("let has_explicit_main_size = match flow"));
+    assert!(render_shared_rs.contains("JustifyMode::Space if has_explicit_main_size"));
     assert!(render_shared_rs.contains("fn apply_gap("));
     assert!(render_state_rs.contains("fn emit_action("));
     assert!(render_state_rs.contains("fn derive_for_item_key("));

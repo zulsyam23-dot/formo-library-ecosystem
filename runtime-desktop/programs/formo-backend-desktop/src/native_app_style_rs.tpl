@@ -176,9 +176,10 @@ impl RenderStyle {
             margin,
             has_margin,
             flow: style_text(node, &["flex-direction", "flexDirection"]).and_then(parse_flow),
-            align: style_text(node, &["align-items", "alignItems"])
-                .and_then(parse_align)
-                .unwrap_or(AlignMode::Stretch),
+            align: style_text(node, &["align-items", "alignItems"]).map_or(
+                AlignMode::Stretch,
+                |raw| parse_align(raw).unwrap_or(AlignMode::Start),
+            ),
             justify: style_text(node, &["justify-content", "justifyContent"])
                 .and_then(parse_justify)
                 .unwrap_or(JustifyMode::Start),
@@ -426,9 +427,19 @@ fn parse_flow(raw: &str) -> Option<Flow> {
 
 fn parse_align(raw: &str) -> Option<AlignMode> {
     match normalize(raw).as_str() {
-        "start" | "flex-start" | "left" | "top" => Some(AlignMode::Start),
+        "start"
+        | "flex-start"
+        | "left"
+        | "top"
+        | "baseline"
+        | "normal"
+        | "self-start"
+        | "safe start"
+        | "unsafe start" => Some(AlignMode::Start),
         "center" => Some(AlignMode::Center),
-        "end" | "flex-end" | "right" | "bottom" => Some(AlignMode::End),
+        "end" | "flex-end" | "right" | "bottom" | "self-end" | "safe end" | "unsafe end" => {
+            Some(AlignMode::End)
+        }
         "stretch" => Some(AlignMode::Stretch),
         _ => None,
     }

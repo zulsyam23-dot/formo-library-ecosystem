@@ -136,6 +136,17 @@ pub(super) fn layout_from_style(flow: Flow, style: RenderStyle) -> egui::Layout 
         AlignMode::Center => egui::Align::Center,
         AlignMode::End => egui::Align::Max,
     };
+    let has_explicit_main_size = match flow {
+        Flow::Row => {
+            style.width.is_some()
+                || style.width_pct.is_some()
+                || style.min_width.is_some()
+                || style.min_width_pct.is_some()
+                || style.max_width.is_some()
+                || style.max_width_pct.is_some()
+        }
+        Flow::Column => style.height.is_some() || style.min_height.is_some() || style.max_height.is_some(),
+    };
     // In egui, row cross-justify can over-expand children vertically unless the row has a fixed height.
     let cross_justify = match flow {
         Flow::Column => style.align == AlignMode::Stretch,
@@ -158,9 +169,11 @@ pub(super) fn layout_from_style(flow: Flow, style: RenderStyle) -> egui::Layout 
         JustifyMode::Start => layout.with_main_align(egui::Align::Min),
         JustifyMode::Center => layout.with_main_align(egui::Align::Center),
         JustifyMode::End => layout.with_main_align(egui::Align::Max),
-        JustifyMode::Space => layout
+        // Match CSS behavior: space-* only distributes when there is free space from an explicit main size.
+        JustifyMode::Space if has_explicit_main_size => layout
             .with_main_align(egui::Align::Center)
             .with_main_justify(true),
+        JustifyMode::Space => layout.with_main_align(egui::Align::Min),
     };
     layout
 }
