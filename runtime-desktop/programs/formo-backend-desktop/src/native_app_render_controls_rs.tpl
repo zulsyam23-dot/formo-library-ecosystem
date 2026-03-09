@@ -17,56 +17,50 @@ pub(super) fn render_button(
     action_log: &mut ActionLog,
     scope: &RenderScope,
 ) {
-    with_style_container(ui, style, FrameDefaults::default(), |ui| {
-        let disabled = prop_bool(node, "disabled", state, scope, false);
-        let label = prop_string(node, "label", scope)
-            .or_else(|| prop_string(node, "text", scope))
-            .unwrap_or_else(|| "Button".to_string());
-        let text = apply_text_style(
-            RichText::new(label).size(style.font_size.unwrap_or(14.0)),
-            style,
-            parse_hex_color("#151515"),
-            Some(600.0),
-            false,
-        );
+    let disabled = prop_bool(node, "disabled", state, scope, false);
+    let label = prop_string(node, "label", scope)
+        .or_else(|| prop_string(node, "text", scope))
+        .unwrap_or_else(|| "Button".to_string());
+    let text = apply_text_style(
+        RichText::new(label).size(style.font_size.unwrap_or(14.0)),
+        style,
+        parse_hex_color("#151515"),
+        Some(600.0),
+        false,
+    );
 
-        let mut button = egui::Button::new(text);
-        if let Some(fill) = style.background.or_else(|| parse_hex_color("#f4f7ff")) {
-            button = button.fill(crate::style::with_opacity(fill, style.opacity));
-        }
-        if let Some(color) = style.border_color.or_else(|| parse_hex_color("#b8bfd8")) {
-            button = button.stroke(egui::Stroke::new(
-                style.border_width.unwrap_or(1.0).max(0.0),
-                crate::style::with_opacity(color, style.opacity),
-            ));
-        }
-        button = button.rounding(egui::Rounding::same(
-            style.border_radius.unwrap_or(8.0).max(0.0),
+    let mut button = egui::Button::new(text);
+    if let Some(fill) = style.background.or_else(|| parse_hex_color("#f4f7ff")) {
+        button = button.fill(crate::style::with_opacity(fill, style.opacity));
+    }
+    if let Some(color) = style.border_color.or_else(|| parse_hex_color("#b8bfd8")) {
+        button = button.stroke(egui::Stroke::new(
+            style.border_width.unwrap_or(1.0).max(0.0),
+            crate::style::with_opacity(color, style.opacity),
         ));
+    }
+    button = button.rounding(egui::Rounding::same(
+        style.border_radius.unwrap_or(8.0).max(0.0),
+    ));
 
-        let response = ui
-            .add_enabled_ui(!disabled, |ui| {
-                match (style.width.or(style.min_width), style.height) {
-                    (Some(w), Some(h)) => ui.add_sized([w.max(0.0), h.max(0.0)], button),
-                    (Some(w), None) => {
-                        ui.add_sized([w.max(0.0), ui.spacing().interact_size.y], button)
-                    }
-                    (None, Some(h)) => {
-                        ui.add_sized([ui.spacing().interact_size.x, h.max(0.0)], button)
-                    }
-                    (None, None) => ui.add(button),
-                }
-            })
-            .inner;
+    let response = ui
+        .add_enabled_ui(!disabled, |ui| {
+            match (style.width.or(style.min_width), style.height) {
+                (Some(w), Some(h)) => ui.add_sized([w.max(0.0), h.max(0.0)], button),
+                (Some(w), None) => ui.add_sized([w.max(0.0), ui.spacing().interact_size.y], button),
+                (None, Some(h)) => ui.add_sized([ui.spacing().interact_size.x, h.max(0.0)], button),
+                (None, None) => ui.add(button),
+            }
+        })
+        .inner;
 
-        if response.clicked() {
-            let action_name = prop_string(node, "onPress", scope)
-                .or_else(|| prop_string(node, "onClick", scope))
-                .or_else(|| prop_string(node, "action", scope))
-                .unwrap_or_default();
-            emit_action(action_log, &action_name, node, JsonValue::Null, state, scope);
-        }
-    });
+    if response.clicked() {
+        let action_name = prop_string(node, "onPress", scope)
+            .or_else(|| prop_string(node, "onClick", scope))
+            .or_else(|| prop_string(node, "action", scope))
+            .unwrap_or_default();
+        emit_action(action_log, &action_name, node, JsonValue::Null, state, scope);
+    }
 }
 
 pub(super) fn render_input(
