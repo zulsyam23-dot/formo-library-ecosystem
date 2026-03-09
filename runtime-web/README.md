@@ -7,6 +7,7 @@
 - emit artifact web (`index.html`, `app.css`, `app.js`)
 - emit runtime source terpecah (`runtime/app/*.js`)
 - runtime state/action/control flow untuk output web
+- render style dari canonical IR (`effective_style_decls`)
 
 ## Apa yang Tidak Ditangani
 
@@ -30,13 +31,18 @@ Sumber: `contracts/CAPABILITIES.json`.
 
 - input:
   - `public ir`
-  - `compiled style map`
+  - `compiled style map` (`decls` + `canonicalDecls`)
 - output:
   - `index.html`
   - `app.css`
   - `app.js`
   - `runtime/README.md`
   - `runtime/app/*.js`
+
+## Catatan Parity
+
+- CSS emitter web membaca style via `formo_ir::effective_style_decls(...)`.
+- Jika `canonicalDecls` tersedia di IR, backend web akan selalu mengutamakan canonical semantics agar sinkron dengan desktop.
 
 ## Mapping Implementasi
 

@@ -220,7 +220,8 @@ Opsi:
 - `--watch`
 - `--prod`
 - `--release-exe` (khusus `desktop`/`multi`)
-- `--strict-parity` (khusus `desktop`/`multi`, build gagal jika ada parity warning)
+- `--strict-parity` (berlaku untuk `web|desktop|multi`, build gagal jika ada parity warning desktop)
+  - pada target `web`, audit parity desktop membutuhkan feature `backend-desktop`
 
 ## 9) `bench`
 
@@ -253,6 +254,7 @@ Opsi penting:
 - `app.css`
 - `runtime/README.md`
 - `runtime/app/*.js` (source runtime terpecah untuk readability)
+- `desktop.parity.json` (opsional; muncul jika `--strict-parity` pada target web menemukan warning parity desktop)
 
 ### Desktop Native
 
@@ -276,8 +278,18 @@ Opsi penting:
 2. `cargo run -p formo-cli -- check --input main.fm --json`
 3. `cargo run -p formo-cli -- diagnose --input main.fm --json`
 4. `cargo run -p formo-cli -- logic --input logic/controllers/app_controller.fl --json-pretty --rt-manifest-out dist-ci/runtime/logic.manifest.json`
-5. `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --prod --strict-parity`
-6. `cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --prod` (mengikuti baseline desktop)
+5. `cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --prod --strict-parity`
+6. `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --prod --strict-parity`
 7. desktop release opsional: `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --release-exe`
 8. `cargo run -p formo-cli -- bench --input main.fm --iterations 20 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --max-compile-p95-ms 80 --max-first-render-p95-ms 60`
+
+## 12) Baseline Engine FM/FL/FS
+
+Untuk memastikan output web/desktop setara:
+
+1. `FM` mendefinisikan struktur UI.
+2. `FL` mendefinisikan event/logic platform-agnostic.
+3. `FS` mendefinisikan style declarative.
+4. IR menyimpan style sebagai `decls` + `canonicalDecls`.
+5. Backend web dan desktop selalu membaca style via `effective_style_decls(...)`.
 

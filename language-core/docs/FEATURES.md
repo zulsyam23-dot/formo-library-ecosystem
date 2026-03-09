@@ -16,6 +16,8 @@ Daftar fitur inti bahasa Formo yang wajib tersedia di library ini.
    - Validasi root component, node built-in/custom, prop required/unknown/type mismatch.
 5. `public_ir_contract`
    - Kontrak IR publik stabil dengan schema dan versioning.
+   - `IrStyle` membawa `decls` (raw) dan `canonicalDecls` (normalisasi deterministik).
+   - Helper publik `normalize_style_decls(...)` dan `effective_style_decls(...)` menjadi baseline lintas backend.
 6. `logic_layer_parser`
    - Parser `.fl` untuk layer logika deklaratif (`module/use/logic/service/contract/adapter`).
    - Mendukung deklarasi standar unit: `enum`, `struct`, `type`, dan `function`.

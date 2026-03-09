@@ -6,6 +6,8 @@ Daftar fitur style Formo yang wajib tersedia di library ini.
 
 1. `style_parser`
    - Parser `.fs` untuk style block, part style, dan deklarasi token.
+   - Menghasilkan `IrStyle.decls` (raw) dan `IrStyle.canonicalDecls` (normalized) via `formo-ir::normalize_style_decls(...)`.
+   - Normalisasi mencakup canonical key + shared value normalization agar web/desktop membaca semantic style yang identik.
 2. `token_system`
    - Dukungan `token(name)` dan `token(name, fallback)`.
 3. `style_allowlist`

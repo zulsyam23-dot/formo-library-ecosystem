@@ -6,7 +6,8 @@ Workflow cepat output desktop:
 
 1. jalankan build desktop dari CLI Formo.
 2. buka folder output.
-3. jalankan scaffold GUI native:
+3. validasi `app.native.json` untuk memastikan `resolvedStyle` sudah mengikuti canonical style.
+4. jalankan scaffold GUI native:
    - `cd native-app`
    - `cargo run`
 

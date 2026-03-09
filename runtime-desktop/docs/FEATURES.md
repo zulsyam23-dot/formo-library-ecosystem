@@ -12,10 +12,15 @@ Daftar fitur runtime desktop Formo yang wajib tersedia di library ini.
      - `native-app/src/model.rs`, `native-app/src/style.rs`
      - `native-app/src/render/mod.rs`, `native-app/src/render/*.rs`
 3. `desktop_style_parity_core`
-   - Mapper style inti untuk desktop native:
+   - Mapper style inti untuk desktop native (canonical-first via `effective_style_decls(...)`):
      - visual: `color`, `background`, `border`, `border-radius`, `box-shadow`, `opacity`
      - spacing/sizing: `padding`, `margin`, `gap`, `width/height`, `min/max-width`, `min/max-height`
-     - layout/text: `align-items`, `justify-content`, `text-align`, `line-height`, `overflow`, `font-weight`, `font-style`
+     - layout/text: `align-items`, `align-self`, `justify-content`, `text-align`, `line-height`, `overflow`, `font-weight`, `font-style`
+     - flow/flex: `display`, `flex-direction`, `flex-wrap`, `flex`, `flex-grow`, `flex-shrink`, `flex-basis`
+   - Aturan behavior parity:
+     - `justify-content: space-*` hanya didistribusikan saat main-axis size eksplisit.
+     - `%` pada width/min/max-width didukung; `%` pada height diperlakukan konservatif agar tidak over-expand.
+     - alias align (`baseline`, `normal`, `self-start`, `self-end`, `safe/unsafe start/end`) dinormalisasi ke semantic desktop yang konsisten.
 4. `desktop_widget_parity_extended`
    - Widget parity tambahan yang tersedia di scaffold native:
      - `Image`, `Spacer`, `Checkbox`, `Switch`, `Modal`

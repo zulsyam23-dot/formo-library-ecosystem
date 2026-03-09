@@ -30,10 +30,15 @@ Contoh artifact hasil build target desktop (native Rust):
 Kontrak minimal:
 
 - runtime target: `rust-native` (tanpa webview).
-- style parity core:
+- style parity core (canonical-first via `effective_style_decls(...)`):
   - visual: `color`, `background`, `border`, `border-radius`, `box-shadow`, `opacity`
   - spacing/sizing: `padding`, `margin`, `gap`, `width/height`, `min/max-width`, `min/max-height`
-  - layout/text: `align-items`, `justify-content`, `text-align`, `line-height`, `overflow`, `font-weight`, `font-style`
+  - layout/text: `align-items`, `align-self`, `justify-content`, `text-align`, `line-height`, `overflow`, `font-weight`, `font-style`
+  - flow/flex: `display`, `flex-direction`, `flex-wrap`, `flex`, `flex-grow`, `flex-shrink`, `flex-basis`
+- behavior parity penting:
+  - `justify-content: space-*` aktif membagi ruang hanya jika main-axis size eksplisit.
+  - `%` width/min/max-width didukung langsung; `%` height diproses konservatif agar tidak meluber.
+  - alias align (`baseline`, `normal`, `self-start`, `self-end`, `safe/unsafe start/end`) dinormalisasi.
 - widget parity tambahan: `Image`, `Spacer`, `Checkbox`, `Switch`, `Modal`, `Fragment`, `If`, `For`
   - scope `For`: `alias`, `aliasIndex`, `aliasKey`
   - interaction `Modal`: close button, backdrop click, `Escape`

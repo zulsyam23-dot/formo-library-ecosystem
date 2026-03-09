@@ -8,6 +8,7 @@
 
 
 Dokumen ini menjelaskan syntax style Formo, token system, tipe value, validasi, dan praktik terbaik.
+Dokumen ini juga menjadi baseline layer `FS` dalam standar engine `FM/FL/FS`.
 
 ## 1) Struktur Dasar
 
@@ -85,6 +86,9 @@ Aturan:
 - selector tidak boleh kosong
 - `style ID` dibentuk dari `component` atau `component:part`
 - deklarasi wajib format `key: value;`
+- hasil parser style disimpan ke IR sebagai:
+  - `decls` (raw declaration),
+  - `canonicalDecls` (normalisasi deterministik untuk runtime lintas target).
 
 ## 4) Property Allowlist
 
@@ -231,4 +235,14 @@ Untuk menjaga hasil visual mirip:
 1. Prioritaskan property core (`color`, `background`, `padding`, `margin`, `font-*`, `gap`, `border*`).
 2. Pantau warning parity desktop di `app.native.json.diagnostics`.
 3. Jika ada style unsupported desktop, siapkan fallback yang tetap readable.
+
+## 10) Canonical Style Engine (Terbaru)
+
+Normalisasi style sekarang dilakukan sekali di level IR agar web dan desktop konsisten:
+
+1. Key dinormalisasi ke canonical kebab-case.
+2. Alias value disejajarkan (contoh: `space-around` -> `space-between`, `baseline` -> `start`).
+3. Runtime membaca style melalui `effective_style_decls(...)`:
+   - pakai `canonicalDecls` jika tersedia,
+   - fallback ke normalisasi dari `decls` jika belum ada.
 

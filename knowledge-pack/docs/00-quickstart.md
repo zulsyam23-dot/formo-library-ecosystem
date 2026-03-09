@@ -85,11 +85,18 @@ Gunakan mode ini jika ingin:
 cargo run -p formo-cli -- build --target web --input main.fm --out dist-web
 ```
 
+Opsional gate parity lintas target:
+
+```bash
+cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --strict-parity
+```
+
 Artifact umum:
 
 - `dist-web/index.html`
 - `dist-web/app.js`
 - `dist-web/app.css`
+- `dist-web/desktop.parity.json` (opsional, hanya jika strict parity menemukan warning desktop)
 
 ## 7) Build Target Desktop Native
 
@@ -148,7 +155,7 @@ Cocok saat iterasi harian.
 2. `cargo run -p formo-cli -- check --input main.fm` untuk validasi cepat.
 3. `cargo run -p formo-cli -- diagnose --input main.fm --json` untuk integrasi tooling.
 4. `cargo run -p formo-cli -- build --target <web|desktop|multi> --input main.fm --out <output-dir>`.
-5. desktop: pantau parity warning di hasil build.
+5. jika butuh konsistensi web/desktop, pakai `--strict-parity` dan pantau laporan parity.
 
 ## 12) Checklist Selesai Quickstart
 

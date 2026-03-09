@@ -9,6 +9,7 @@
 - command output: `build` (web/desktop/multi)
 - command quality: `fmt`, `bench`
 - mode `watch` dan payload `lsp`
+- strict parity gate lintas target (`--strict-parity`)
 
 ## Apa yang Tidak Ditangani
 
@@ -49,7 +50,13 @@ Sumber: `contracts/CAPABILITIES.json`.
 cargo run -p formo-cli -- check --input main.fm
 cargo run -p formo-cli -- diagnose --input main.fm --json-pretty
 cargo run -p formo-cli -- build --target multi --input main.fm --out dist
+cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --strict-parity
 ```
+
+Catatan strict parity:
+
+- `--strict-parity` berlaku di target `web`, `desktop`, dan `multi`.
+- Pada target `web`, CLI menjalankan audit parity desktop (jika feature `backend-desktop` aktif) dan dapat menulis `desktop.parity.json`.
 
 ## Validasi Cepat
 

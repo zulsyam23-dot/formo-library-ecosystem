@@ -11,10 +11,16 @@ Dokumentasi ini disusun sebagai manual lengkap penggunaan:
 
 - library Formo (pipeline + tooling),
 - bahasa Formo (`.fm`),
+- bahasa logic Formo (`.fl`),
 - bahasa style Formo (`.fs`),
 - workflow build web/desktop,
 - teknik pemrograman dari basic sampai advanced,
 - pola kerja yang mudah dipahami AI agent.
+
+Baseline engine terbaru:
+
+- `FM` + `FL` + `FS` adalah kontrak standar sumber.
+- layer runtime wajib membaca style canonical yang sama (`effective_style_decls(...)`) agar hasil web/desktop sinkron.
 
 ## Peta Dokumen
 

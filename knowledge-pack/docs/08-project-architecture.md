@@ -12,9 +12,10 @@ Panduan arsitektur ini membantu menjaga codebase Formo tetap rapi saat skala pro
 ## 1) Prinsip Inti
 
 1. Pisahkan domain UI, style, dan integration logic.
-2. Gunakan komponen kecil dan composable.
-3. Hindari file monolitik.
-4. Selalu parity-aware untuk target desktop.
+2. Jadikan `FM/FL/FS` sebagai kontrak standar lintas target.
+3. Gunakan komponen kecil dan composable.
+4. Hindari file monolitik.
+5. Selalu parity-aware untuk target desktop.
 
 ## 2) Blueprint Skala Kecil
 
@@ -143,8 +144,19 @@ Agar web/desktop tetap sejalan:
 1. build `multi` di CI.
 2. treat parity warning desktop sebagai quality signal.
 3. simpan daftar style/widget yang butuh fallback.
+4. validasi bahwa `FS` diproses menjadi `canonicalDecls` sebelum runtime dipanggil.
 
-## 11) Ownership dan Review
+## 11) Baseline Engine Lintas Target
+
+Standar yang wajib dijaga:
+
+1. `FM` untuk struktur UI.
+2. `FL` untuk logic/event.
+3. `FS` untuk style declarative.
+4. `IR` menyimpan style dalam `decls` + `canonicalDecls`.
+5. backend web dan desktop mengonsumsi style yang sama lewat `effective_style_decls(...)`.
+
+## 12) Ownership dan Review
 
 Saran review policy:
 
@@ -153,7 +165,7 @@ Saran review policy:
 3. perubahan runtime-target wajib build target terkait.
 4. perubahan lintas domain wajib update docs.
 
-## 12) Anti-Pattern Arsitektur
+## 13) Anti-Pattern Arsitektur
 
 1. semua komponen dalam satu file.
 2. token campur dengan style per fitur tanpa struktur.

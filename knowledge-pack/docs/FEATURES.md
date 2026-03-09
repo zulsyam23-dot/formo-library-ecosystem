@@ -18,9 +18,9 @@ Daftar fitur knowledge pack dokumentasi Formo yang wajib tersedia.
 3. `formo_language_reference`
    - Referensi rinci bahasa `.fm` (component, built-in, props, tipe data, scope).
 4. `formo_style_reference`
-   - Referensi rinci bahasa `.fs` (token, selector, value type, allowlist).
+   - Referensi rinci bahasa `.fs` (token, selector, value type, allowlist, canonical style baseline).
 5. `cli_runtime_reference`
-   - Referensi command CLI Formo, artifact, target runtime, dan workflow CI.
+   - Referensi command CLI Formo, artifact, target runtime, strict parity, dan workflow CI.
 6. `programming_techniques`
    - Kumpulan teknik pemrograman Formo untuk berbagai kasus (basic-advanced).
 7. `troubleshooting_matrix`
@@ -37,6 +37,8 @@ Daftar fitur knowledge pack dokumentasi Formo yang wajib tersedia.
     - Standar quality gate dan checklist CI/CD berbasis command Formo.
 13. `integration_checklist`
     - Checklist integrasi lintas tahap (struktur project, validasi, build, dan release).
+14. `engine_standard_reference`
+    - Panduan menjaga standar engine `FM/FL/FS` agar web dan desktop memakai semantic style canonical yang sama.
 
 ## Catatan
 

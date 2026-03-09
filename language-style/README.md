@@ -9,6 +9,7 @@
 - style allowlist validation
 - unused token detection
 - style reference validation
+- canonical style normalization (`decls` -> `canonicalDecls`)
 
 ## Apa yang Tidak Ditangani
 
@@ -34,9 +35,17 @@ Sumber: `contracts/CAPABILITIES.json`.
   - `.fs style files`
   - `style references from fm`
 - output:
-  - `style registry`
+  - `style registry` (raw + canonical declarations)
   - `token map`
   - `style diagnostics`
+
+## Standar Engine FM/FL/FS
+
+- Layer `FS` adalah sumber style deklaratif.
+- Output style dikirim ke IR dalam dua bentuk:
+  - `decls` untuk trace raw source,
+  - `canonicalDecls` untuk semantic runtime lintas target.
+- Backend web dan desktop membaca style via `formo_ir::effective_style_decls(...)`.
 
 ## Mapping Implementasi
 

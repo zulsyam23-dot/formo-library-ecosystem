@@ -30,6 +30,19 @@ Repo ini memiliki 7 library level-domain:
 6. `ai-interop` - kontrak pertukaran capability/error profile untuk AI.
 7. `knowledge-pack` - dokumentasi operasional dan prompt-ready references.
 
+## Standar Engine Terbaru (FM/FL/FS)
+
+Engine Formo sekarang memakai baseline lintas target berikut:
+
+1. `FM` menyimpan struktur UI + wiring komponen.
+2. `FL` menyimpan kontrak logic/event platform-agnostic.
+3. `FS` menyimpan style declarative yang dinormalisasi ke bentuk canonical.
+4. `formo-ir` menyimpan dua lapis style:
+   - `decls` (raw declaration dari parser style),
+   - `canonicalDecls` (hasil normalisasi deterministik).
+5. Runtime web dan desktop sama-sama membaca style dari `formo_ir::effective_style_decls(...)`,
+   sehingga perilaku style baseline tidak bergantung target.
+
 ## Workspace Crates (Aktif di Cargo.toml)
 
 Total crate Rust yang tergabung saat ini: **10**
@@ -47,7 +60,7 @@ Total crate Rust yang tergabung saat ini: **10**
 
 ## Status Saat Ini
 
-Berdasarkan `MIGRATION_STATUS.md` (update: **2026-03-07**):
+Berdasarkan `MIGRATION_STATUS.md` (update: **2026-03-09**):
 
 - Total library: **7**
 - Status `active`: **5** (`language-core`, `language-style`, `runtime-web`, `runtime-desktop`, `tooling`)

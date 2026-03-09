@@ -8,7 +8,7 @@
 - parser + recovery
 - import resolution
 - type validation
-- public IR contract
+- public IR contract + canonical style helper
 - strict profile untuk logic `.fl`
 
 ## Apa yang Tidak Ditangani
@@ -40,7 +40,14 @@ Sumber: `contracts/CAPABILITIES.json`.
   - `ast`
   - `resolved modules`
   - `typed semantic model`
-  - `public ir`
+  - `public ir` (`decls` + `canonicalDecls` untuk style)
+
+## Catatan Engine Terbaru
+
+- `formo-ir` menyediakan normalisasi style lintas target lewat:
+  - `normalize_style_decls(...)`
+  - `effective_style_decls(...)`
+- Runtime web dan desktop harus membaca style melalui `effective_style_decls(...)` untuk menjaga hasil build konsisten.
 
 ## Mapping Implementasi
 

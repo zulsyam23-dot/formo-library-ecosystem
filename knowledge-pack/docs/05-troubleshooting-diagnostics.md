@@ -124,7 +124,26 @@ Perbaikan:
 3. gunakan property/style yang parity-friendly.
 4. untuk compile release otomatis gunakan `--release-exe`.
 
-## 9) Contoh Debug Cepat (Template)
+## 9) Mismatch Web vs Desktop (Engine Canonical)
+
+Gejala:
+
+- output web rapi tapi desktop spacing/flow berbeda,
+- atau sebaliknya.
+
+Perbaikan:
+
+1. pastikan build memakai engine terbaru (runtime web/desktop sama-sama membaca `effective_style_decls(...)`).
+2. cek `app.ir.json` pada objek style:
+   - `decls` terisi,
+   - `canonicalDecls` terisi dan bernilai canonical.
+3. jalankan:
+   - `cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --strict-parity`
+4. jika gagal strict parity, baca:
+   - `dist-web/desktop.parity.json` (web strict parity),
+   - atau `dist-desktop/app.native.json` (desktop target).
+
+## 10) Contoh Debug Cepat (Template)
 
 Langkah:
 
@@ -143,7 +162,7 @@ Fokus field JSON:
 - `errorMeta.line`
 - `errorMeta.col`
 
-## 10) Checklist Sebelum Menyalahkan Runtime
+## 11) Checklist Sebelum Menyalahkan Runtime
 
 1. Source `.fm` valid.
 2. Source `.fs` valid.
@@ -151,7 +170,7 @@ Fokus field JSON:
 4. Build berhasil.
 5. Jika desktop mismatch, bandingkan parity warning dulu.
 
-## 11) Workflow Incident Response (Tim)
+## 12) Workflow Incident Response (Tim)
 
 1. Reproduce di branch kecil.
 2. Simpan output `cargo run -p formo-cli -- check --input main.fm --json-pretty`.

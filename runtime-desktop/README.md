@@ -9,6 +9,8 @@
 - parity diagnostics untuk gap style/widget desktop
 - readable artifacts untuk inspeksi AI/manusia
 - bridge action/state untuk host desktop
+- runtime style resolver canonical (`effective_style_decls`) agar baseline web/desktop konsisten
+- flex sizing parity phase-2 (`flex`, `flex-grow`, `flex-shrink`, `flex-basis`)
 
 ## Apa yang Tidak Ditangani
 
@@ -36,7 +38,7 @@ Sumber: `contracts/CAPABILITIES.json`.
 
 - input:
   - `public ir`
-  - `compiled style map`
+  - `compiled style map` (`decls` + `canonicalDecls`)
 - output:
   - `app.native.json`
   - `app.native.rs`
@@ -47,6 +49,12 @@ Sumber: `contracts/CAPABILITIES.json`.
   - `readable/README.md`
   - `readable/native/*.json`
   - `readable/ir/*.json`
+
+## Catatan Parity Engine
+
+- Backend desktop membaca style lewat `formo_ir::effective_style_decls(...)`.
+- `justify-content: space-*` hanya mendistribusikan ruang jika ada ukuran main-axis eksplisit.
+- `%` pada `width/min/max-width` didukung langsung; `%` pada `height` diproses konservatif untuk menjaga stabilitas layout.
 
 ## Mapping Implementasi
 

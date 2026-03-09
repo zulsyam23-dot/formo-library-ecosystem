@@ -13,6 +13,7 @@ Daftar fitur tooling Formo yang wajib tersedia di library ini.
    - `build --target web|desktop|multi`.
    - `build --strict-parity` untuk memaksa zero desktop parity warning (`W7601`/`W7602`) pada target `web`, `desktop`, maupun `multi`.
    - Pada target `web`, `--strict-parity` membutuhkan feature `backend-desktop` agar audit parity dapat dijalankan.
+   - Jika audit parity desktop gagal pada target `web`, CLI menulis `desktop.parity.json` di output web.
 3. `watch_mode`
    - Watch mode untuk `check`, `diagnose`, dan `build`.
 4. `benchmark_mode`

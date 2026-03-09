@@ -11,6 +11,7 @@ Contoh artifact hasil build target web:
 Kontrak minimal:
 
 - `index.html` memuat root container app.
-- `app.css` memuat style hasil compile `.fs`.
+- `app.css` memuat style canonical hasil `effective_style_decls(...)` dari IR.
 - `app.js` memuat runtime DOM + state/action/control-flow.
 - `runtime/app/*.js` memuat source runtime yang sama dalam bentuk terpecah (readable).
+- `desktop.parity.json` dapat muncul saat build web dijalankan dengan `--strict-parity` dan audit desktop menemukan warning parity.

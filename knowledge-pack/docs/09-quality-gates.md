@@ -22,15 +22,20 @@ Dokumen ini mendefinisikan quality gate minimal agar proyek Formo stabil di peng
 5. Jika desktop didukung:
    - `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop`.
    - review parity warning.
+6. Jika produk membutuhkan kesetaraan lintas target:
+   - `cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --strict-parity`.
+   - untuk target web, strict parity memerlukan feature `backend-desktop`.
 
 ## 2) Gate Rekomendasi untuk Release
 
 1. `cargo run -p formo-cli -- build --target multi --input main.fm --out dist --prod`.
 2. desktop executable release:
    - `cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-desktop --release-exe`.
-3. benchmark:
+3. strict parity lintas target:
+   - `cargo run -p formo-cli -- build --target web --input main.fm --out dist-web --prod --strict-parity`.
+4. benchmark:
    - `cargo run -p formo-cli -- bench --input main.fm --iterations 20 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --max-compile-p95-ms 80 --max-first-render-p95-ms 60` dengan budget p95 compile + first render.
-4. validasi artifact layout final.
+5. validasi artifact layout final.
 
 ## 3) Contoh Pipeline Command
 
