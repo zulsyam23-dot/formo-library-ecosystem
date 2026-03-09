@@ -137,8 +137,13 @@ impl eframe::App for FormoNativeApp {
                 });
         }
 
+        let panel_fill = ctx.style().visuals.panel_fill;
         egui::CentralPanel::default()
-            .frame(egui::Frame::none().inner_margin(egui::Margin::same(16.0)))
+            .frame(
+                egui::Frame::none()
+                    .fill(panel_fill)
+                    .inner_margin(egui::Margin::same(16.0)),
+            )
             .show(ctx, |ui| {
                 if let Some(root) = self.entry_root().cloned() {
                     render_tree(ui, &root, &mut self.state, &mut self.action_log);
