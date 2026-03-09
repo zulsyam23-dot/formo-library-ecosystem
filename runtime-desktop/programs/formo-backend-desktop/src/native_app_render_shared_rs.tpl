@@ -125,12 +125,22 @@ pub(super) fn layout_from_style(flow: Flow, style: RenderStyle) -> egui::Layout 
         AlignMode::Center => egui::Align::Center,
         AlignMode::End => egui::Align::Max,
     };
+    // In egui, row cross-justify can over-expand children vertically unless the row has a fixed height.
+    let cross_justify = match flow {
+        Flow::Column => style.align == AlignMode::Stretch,
+        Flow::Row => {
+            style.align == AlignMode::Stretch
+                && (style.height.is_some()
+                    || style.min_height.is_some()
+                    || style.max_height.is_some())
+        }
+    };
     let mut layout = match flow {
         Flow::Row => egui::Layout::left_to_right(cross),
         Flow::Column => egui::Layout::top_down(cross),
     }
     .with_main_wrap(style.wrap)
-    .with_cross_justify(style.align == AlignMode::Stretch);
+    .with_cross_justify(cross_justify);
 
     layout = match style.justify {
         JustifyMode::Start => layout.with_main_align(egui::Align::Min),
