@@ -1,7 +1,7 @@
 use crate::allowlist::{is_allowed_style_property, is_token_key};
 use crate::diagnostics::format_style_diag;
 use crate::value::parse_style_value;
-use formo_ir::{IrStyle, StyleSelector, Value};
+use formo_ir::{normalize_style_decls, IrStyle, StyleSelector, Value};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug, Clone)]
@@ -141,6 +141,7 @@ impl<'a> StyleParser<'a> {
         self.styles.push(IrStyle {
             id: style_id,
             selector,
+            canonical_decls: normalize_style_decls(&decls),
             decls,
         });
 

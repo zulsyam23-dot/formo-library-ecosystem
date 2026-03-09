@@ -1,4 +1,4 @@
-use formo_ir::{IrProgram, Value};
+use formo_ir::{effective_style_decls, IrProgram, Value};
 
 pub(crate) fn render_css(ir: &IrProgram) -> String {
     format!("{}{}", base_css(), generate_style_rules(ir))
@@ -17,7 +17,8 @@ fn generate_style_rules(ir: &IrProgram) -> String {
         out.push_str(&style_id_to_class(&style.id));
         out.push_str(" {\n");
 
-        for (key, value) in &style.decls {
+        let decls = effective_style_decls(style);
+        for (key, value) in &decls {
             let css_prop = to_css_prop_name(key);
             let css_value = to_css_value(value);
             out.push_str("  ");

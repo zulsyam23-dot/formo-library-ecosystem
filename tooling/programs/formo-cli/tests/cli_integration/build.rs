@@ -157,6 +157,88 @@ fn build_desktop_project_generates_native_bundle_and_ir() {
 }
 
 #[test]
+fn build_web_and_desktop_share_canonical_style_semantics() {
+    let workspace = TempWorkspace::new("formo_cli_build_canonical_style_parity");
+    create_canonical_style_parity_sample(workspace.path());
+
+    let web_output = run_formo(
+        workspace.path(),
+        &[
+            "build", "--target", "web", "--input", "main.fm", "--out", "dist-web",
+        ],
+    );
+    assert!(
+        web_output.status.success(),
+        "expected web build success, stderr={}",
+        String::from_utf8_lossy(&web_output.stderr)
+    );
+
+    let desktop_output = run_formo(
+        workspace.path(),
+        &[
+            "build",
+            "--target",
+            "desktop",
+            "--input",
+            "main.fm",
+            "--out",
+            "dist-desktop",
+        ],
+    );
+    assert!(
+        desktop_output.status.success(),
+        "expected desktop build success, stderr={}",
+        String::from_utf8_lossy(&desktop_output.stderr)
+    );
+
+    let css = fs::read_to_string(workspace.path().join("dist-web/app.css"))
+        .expect("expected web css output");
+    assert!(
+        css.contains("align-items: start;"),
+        "expected canonical align-items value in web css, got: {css}"
+    );
+    assert!(
+        css.contains("justify-content: space-between;"),
+        "expected canonical justify-content value in web css, got: {css}"
+    );
+
+    let native_raw = fs::read_to_string(workspace.path().join("dist-desktop/app.native.json"))
+        .expect("expected desktop native json output");
+    let native: Value = serde_json::from_str(&native_raw).expect("desktop native json should parse");
+    let root = &native["components"][0]["rootNode"];
+    let row = find_widget_node(root, "Row").expect("expected Row node in desktop native json");
+    assert_eq!(
+        row["resolvedStyle"]["align-items"]["v"],
+        Value::String("start".to_string()),
+        "desktop resolved style should use canonical align-items value"
+    );
+    assert_eq!(
+        row["resolvedStyle"]["justify-content"]["v"],
+        Value::String("space-between".to_string()),
+        "desktop resolved style should use canonical justify-content value"
+    );
+}
+
+fn find_widget_node<'a>(node: &'a Value, widget: &str) -> Option<&'a Value> {
+    if node
+        .get("widget")
+        .and_then(Value::as_str)
+        .map(|v| v == widget)
+        .unwrap_or(false)
+    {
+        return Some(node);
+    }
+
+    let children = node.get("children").and_then(Value::as_array)?;
+    for child in children {
+        if let Some(found) = find_widget_node(child, widget) {
+            return Some(found);
+        }
+    }
+    None
+}
+
+#[test]
 fn build_desktop_reports_parity_warnings_in_stdout() {
     let workspace = TempWorkspace::new("formo_cli_build_desktop_parity");
     create_desktop_parity_gap_sample(workspace.path());

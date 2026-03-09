@@ -1,5 +1,6 @@
 use formo_ir::{
-    Backend, BackendOutput, Diagnostic, IrNode, IrProgram, IrStyle, OutputFile, SourceLoc, Value,
+    effective_style_decls, Backend, BackendOutput, Diagnostic, IrNode, IrProgram, IrStyle,
+    OutputFile, SourceLoc, Value,
 };
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
@@ -276,8 +277,9 @@ fn resolve_styles(
     let mut merged = BTreeMap::new();
     for style_id in style_refs {
         if let Some(style) = style_by_id.get(style_id.as_str()) {
-            for (key, value) in &style.decls {
-                merged.insert(key.clone(), value.clone());
+            let decls = effective_style_decls(style);
+            for (key, value) in decls {
+                merged.insert(key, value);
             }
         }
     }
@@ -312,7 +314,8 @@ fn collect_desktop_parity_diagnostics(ir: &IrProgram) -> Vec<Diagnostic> {
             .get(style.id.as_str())
             .cloned()
             .unwrap_or_else(default_backend_source);
-        for key in style.decls.keys() {
+        let decls = effective_style_decls(style);
+        for key in decls.keys() {
             if is_supported_desktop_style_prop(key) {
                 continue;
             }

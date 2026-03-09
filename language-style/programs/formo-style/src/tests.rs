@@ -230,6 +230,19 @@ style HeaderCard:title {
     let expected = r##"{
   "styles": [
     {
+      "canonicalDecls": {
+        "color": {
+          "t": "color",
+          "v": "#0A84FF"
+        },
+        "padding": {
+          "t": "len",
+          "v": {
+            "unit": "dp",
+            "value": 12.0
+          }
+        }
+      },
       "decls": {
         "color": {
           "t": "color",
@@ -250,6 +263,16 @@ style HeaderCard:title {
       }
     },
     {
+      "canonicalDecls": {
+        "font-size": {
+          "t": "int",
+          "v": 16
+        },
+        "font-weight": {
+          "t": "int",
+          "v": 700
+        }
+      },
       "decls": {
         "font-size": {
           "t": "int",

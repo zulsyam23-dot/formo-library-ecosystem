@@ -280,6 +280,34 @@ component B() {
     );
 }
 
+pub(crate) fn create_canonical_style_parity_sample(root: &Path) {
+    write_file(
+        root,
+        "main.fm",
+        r#"import "styles/base.fs" as Base;
+
+component App() {
+  <Page>
+    <Row style=FeedRow>
+      <Text value="A"/>
+      <Text value="B"/>
+    </Row>
+  </Page>
+}
+"#,
+    );
+
+    write_file(
+        root,
+        "styles/base.fs",
+        r#"style FeedRow {
+  align-items: baseline;
+  justify-content: space-around;
+}
+"#,
+    );
+}
+
 pub(crate) fn create_parser_recovery_sample(root: &Path) {
     write_file(
         root,

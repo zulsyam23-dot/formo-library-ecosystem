@@ -56,6 +56,7 @@ fn sample_ir() -> IrProgram {
                 part: "root".to_string(),
             },
             decls: style_decls,
+            canonical_decls: BTreeMap::new(),
         }],
         diagnostics: vec![],
     }
@@ -99,6 +100,7 @@ fn sample_ir_with_parity_gaps() -> IrProgram {
                 part: "root".to_string(),
             },
             decls: style_decls,
+            canonical_decls: BTreeMap::new(),
         }],
         diagnostics: vec![],
     }

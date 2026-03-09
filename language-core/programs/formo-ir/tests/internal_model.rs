@@ -72,6 +72,7 @@ fn sample_ir() -> IrProgram {
                 part: "root".to_string(),
             },
             decls: BTreeMap::new(),
+            canonical_decls: BTreeMap::new(),
         }],
         diagnostics: vec![],
     }
