@@ -28,11 +28,6 @@ pub(super) fn render_text(
             false,
         );
         show_text(ui, rich, style.text_align);
-        let line_height = style.line_height.unwrap_or(1.4).max(1.0);
-        let extra = ((line_height - 1.0) * font_size).max(0.0);
-        if extra > 0.0 {
-            ui.add_space(extra);
-        }
     });
 }
 

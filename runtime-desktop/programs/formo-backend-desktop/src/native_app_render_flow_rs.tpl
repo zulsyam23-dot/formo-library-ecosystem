@@ -61,9 +61,7 @@ pub(super) fn render_block(
     scope: &RenderScope,
 ) {
     with_style_container(ui, style, FrameDefaults::default(), |ui| {
-        for child in &node.children {
-            render_tree_scoped(ui, child, state, action_log, scope);
-        }
+        render_document_flow_children(ui, &node.children, state, action_log, scope);
     });
 }
 
@@ -167,9 +165,7 @@ pub(super) fn render_frame_container(
                 );
             }
         }
-        for child in &node.children {
-            render_tree_scoped(ui, child, state, action_log, scope);
-        }
+        render_document_flow_children(ui, &node.children, state, action_log, scope);
     });
 }
 
@@ -182,6 +178,34 @@ pub(super) fn render_fragment(
 ) {
     for child in &node.children {
         render_tree_scoped(ui, child, state, action_log, scope);
+    }
+}
+
+fn render_document_flow_children(
+    ui: &mut egui::Ui,
+    children: &[NativeNode],
+    state: &mut NativeState,
+    action_log: &mut ActionLog,
+    scope: &RenderScope,
+) {
+    let mut index = 0usize;
+    while index < children.len() {
+        if children[index].widget == "Text" {
+            let start = index;
+            while index < children.len() && children[index].widget == "Text" {
+                index += 1;
+            }
+            ui.horizontal_wrapped(|ui| {
+                ui.spacing_mut().item_spacing.x = 0.0;
+                for child in &children[start..index] {
+                    render_tree_scoped(ui, child, state, action_log, scope);
+                }
+            });
+            continue;
+        }
+
+        render_tree_scoped(ui, &children[index], state, action_log, scope);
+        index += 1;
     }
 }
 
