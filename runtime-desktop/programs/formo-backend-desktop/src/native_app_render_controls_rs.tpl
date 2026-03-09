@@ -51,7 +51,7 @@ pub(super) fn render_button(
                 style.width_pct.or(style.min_width_pct),
                 available.x,
             );
-            let height = resolve_length(style.height, style.height_pct, available.y);
+            let height = style.height;
             match (width, height) {
                 (Some(w), Some(h)) => ui.add_sized([w.max(0.0), h.max(0.0)], button),
                 (Some(w), None) => ui.add_sized([w.max(0.0), ui.spacing().interact_size.y], button),
@@ -127,7 +127,7 @@ pub(super) fn render_input(
             )
             .unwrap_or(220.0)
             .max(0.0);
-            let height = resolve_length(style.height, style.height_pct, available.y);
+            let height = style.height;
             let response = ui
                 .add_enabled_ui(!disabled, |ui| {
                     let mut edit = egui::TextEdit::singleline(&mut text).frame(false);

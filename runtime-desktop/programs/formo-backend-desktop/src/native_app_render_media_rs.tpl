@@ -47,9 +47,7 @@ pub(super) fn render_image(
     let width = resolve_length(style.width, style.width_pct, available.x)
         .unwrap_or(160.0)
         .max(0.0);
-    let height = resolve_length(style.height, style.height_pct, available.y)
-        .unwrap_or(96.0)
-        .max(0.0);
+    let height = style.height.unwrap_or(96.0).max(0.0);
     let alt = prop_string(node, "alt", scope).unwrap_or_else(|| "Image".to_string());
     let src = prop_string(node, "src", scope).unwrap_or_default();
 
@@ -96,7 +94,7 @@ pub(super) fn render_spacer(
     let available = ui.available_size_before_wrap();
     let size = prop_len(node, "size", scope)
         .or_else(|| resolve_length(style.width, style.width_pct, available.x))
-        .or_else(|| resolve_length(style.height, style.height_pct, available.y))
+        .or(style.height)
         .unwrap_or(8.0)
         .max(0.0);
     with_style_container(ui, style, FrameDefaults::default(), |ui| {

@@ -95,19 +95,19 @@ fn apply_size(ui: &mut egui::Ui, style: RenderStyle) {
     if let Some(v) = resolve_length(style.min_width, style.min_width_pct, available.x) {
         ui.set_min_width(v.max(0.0));
     }
-    if let Some(v) = resolve_length(style.min_height, style.min_height_pct, available.y) {
+    if let Some(v) = style.min_height {
         ui.set_min_height(v.max(0.0));
     }
     if let Some(v) = resolve_length(style.max_width, style.max_width_pct, available.x) {
         ui.set_max_width(v.max(0.0));
     }
-    if let Some(v) = resolve_length(style.max_height, style.max_height_pct, available.y) {
+    if let Some(v) = style.max_height {
         ui.set_max_height(v.max(0.0));
     }
     if let Some(v) = resolve_length(style.width, style.width_pct, available.x) {
         ui.set_width(v.max(0.0));
     }
-    if let Some(v) = resolve_length(style.height, style.height_pct, available.y) {
+    if let Some(v) = style.height {
         ui.set_height(v.max(0.0));
     }
 }
@@ -142,11 +142,9 @@ pub(super) fn layout_from_style(flow: Flow, style: RenderStyle) -> egui::Layout 
         Flow::Row => {
             style.align == AlignMode::Stretch
                 && (style.height.is_some()
-                    || style.height_pct.is_some()
                     || style.min_height.is_some()
-                    || style.min_height_pct.is_some()
                     || style.max_height.is_some()
-                    || style.max_height_pct.is_some())
+                )
         }
     };
     let mut layout = match flow {
