@@ -405,10 +405,10 @@ fn validate_set_operands(
                 };
                 ty.clone()
             }
-            LogicSetOperand::BoolLiteral => "bool".to_string(),
-            LogicSetOperand::StringLiteral => "string".to_string(),
-            LogicSetOperand::IntLiteral => "int".to_string(),
-            LogicSetOperand::FloatLiteral => "float".to_string(),
+            LogicSetOperand::BoolLiteral(_) => "bool".to_string(),
+            LogicSetOperand::StringLiteral(_) => "string".to_string(),
+            LogicSetOperand::IntLiteral(_) => "int".to_string(),
+            LogicSetOperand::FloatLiteral(_) => "float".to_string(),
         };
         operand_types.push(operand_type);
     }

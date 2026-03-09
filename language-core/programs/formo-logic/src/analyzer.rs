@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 
 use crate::ast::{
-    LogicAction, LogicActionKind, LogicEvent, LogicScope, LogicSetOperand, LogicSetOperator,
-    LogicSetValueHint,
+    LogicAction, LogicActionKind, LogicEvent, LogicScope, LogicSetExprToken, LogicSetOperand,
+    LogicSetOperator, LogicSetValueHint,
 };
 use crate::utils::{is_ident_continue, is_ident_start, is_lower_camel_case, starts_uppercase};
 
@@ -13,7 +13,7 @@ use parser_helpers::*;
 enum Tok {
     Word(String),
     Number(String),
-    StringLit,
+    StringLit(String),
     Dot,
     Comma,
     Colon,
@@ -303,12 +303,19 @@ pub(crate) fn analyze_unit_body(body: &str) -> Result<UnitAnalysis, String> {
                             set_value_hint: None,
                             set_operands: Vec::new(),
                             set_operators: Vec::new(),
+                            set_expression_rpn: Vec::<LogicSetExprToken>::new(),
                         });
                         next_index = next;
                     }
                     "set" => {
-                        let (state_target, value_hint, set_operands, set_operators, next) =
-                            parse_set_assignment(&tokens, i + 2)?;
+                        let (
+                            state_target,
+                            value_hint,
+                            set_operands,
+                            set_operators,
+                            set_expression_rpn,
+                            next,
+                        ) = parse_set_assignment(&tokens, i + 2)?;
                         events[event_idx].actions.push(LogicAction {
                             kind: LogicActionKind::Set,
                             scope,
@@ -316,6 +323,7 @@ pub(crate) fn analyze_unit_body(body: &str) -> Result<UnitAnalysis, String> {
                             set_value_hint: Some(value_hint),
                             set_operands,
                             set_operators,
+                            set_expression_rpn,
                         });
                         next_index = next;
                     }
@@ -327,6 +335,7 @@ pub(crate) fn analyze_unit_body(body: &str) -> Result<UnitAnalysis, String> {
                             set_value_hint: None,
                             set_operands: Vec::new(),
                             set_operators: Vec::new(),
+                            set_expression_rpn: Vec::<LogicSetExprToken>::new(),
                         });
                     }
                     "throw" => {
@@ -350,6 +359,7 @@ pub(crate) fn analyze_unit_body(body: &str) -> Result<UnitAnalysis, String> {
                             set_value_hint: None,
                             set_operands: Vec::new(),
                             set_operators: Vec::new(),
+                            set_expression_rpn: Vec::<LogicSetExprToken>::new(),
                         });
                     }
                     "break" => {
@@ -373,6 +383,7 @@ pub(crate) fn analyze_unit_body(body: &str) -> Result<UnitAnalysis, String> {
                             set_value_hint: None,
                             set_operands: Vec::new(),
                             set_operators: Vec::new(),
+                            set_expression_rpn: Vec::<LogicSetExprToken>::new(),
                         });
                     }
                     "continue" => {
@@ -396,6 +407,7 @@ pub(crate) fn analyze_unit_body(body: &str) -> Result<UnitAnalysis, String> {
                             set_value_hint: None,
                             set_operands: Vec::new(),
                             set_operators: Vec::new(),
+                            set_expression_rpn: Vec::<LogicSetExprToken>::new(),
                         });
                     }
                     "return" => {
@@ -406,6 +418,7 @@ pub(crate) fn analyze_unit_body(body: &str) -> Result<UnitAnalysis, String> {
                             set_value_hint: None,
                             set_operands: Vec::new(),
                             set_operators: Vec::new(),
+                            set_expression_rpn: Vec::<LogicSetExprToken>::new(),
                         });
                     }
                     _ => {

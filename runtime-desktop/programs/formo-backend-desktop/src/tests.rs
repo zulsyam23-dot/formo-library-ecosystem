@@ -106,6 +106,108 @@ fn sample_ir_with_parity_gaps() -> IrProgram {
     }
 }
 
+fn sample_ir_with_actions() -> IrProgram {
+    let button_props = BTreeMap::from([
+        (
+            "label".to_string(),
+            Value {
+                t: "string".to_string(),
+                v: serde_json::Value::String("Save".to_string()),
+            },
+        ),
+        (
+            "onPress".to_string(),
+            Value {
+                t: "string".to_string(),
+                v: serde_json::Value::String("saveForm".to_string()),
+            },
+        ),
+    ]);
+
+    let input_props = BTreeMap::from([
+        (
+            "name".to_string(),
+            Value {
+                t: "string".to_string(),
+                v: serde_json::Value::String("query".to_string()),
+            },
+        ),
+        (
+            "onChange".to_string(),
+            Value {
+                t: "string".to_string(),
+                v: serde_json::Value::String("search:update".to_string()),
+            },
+        ),
+    ]);
+
+    let button_dup_props = BTreeMap::from([(
+        "onClick".to_string(),
+        Value {
+            t: "string".to_string(),
+            v: serde_json::Value::String("saveForm".to_string()),
+        },
+    )]);
+
+    IrProgram {
+        ir_version: "0.3.0".to_string(),
+        entry: "App".to_string(),
+        target: Target::Desktop,
+        tokens: BTreeMap::new(),
+        components: vec![IrComponent {
+            id: "c_app".to_string(),
+            name: "App".to_string(),
+            root_node_id: "n_root".to_string(),
+            exports: true,
+            source: source(),
+        }],
+        nodes: vec![
+            IrNode {
+                id: "n_root".to_string(),
+                kind: "element".to_string(),
+                name: "Page".to_string(),
+                props: BTreeMap::new(),
+                style_refs: vec![],
+                children: vec![
+                    "n_button".to_string(),
+                    "n_input".to_string(),
+                    "n_button_dup".to_string(),
+                ],
+                source: source(),
+            },
+            IrNode {
+                id: "n_button".to_string(),
+                kind: "element".to_string(),
+                name: "Button".to_string(),
+                props: button_props,
+                style_refs: vec![],
+                children: vec![],
+                source: source(),
+            },
+            IrNode {
+                id: "n_input".to_string(),
+                kind: "element".to_string(),
+                name: "Input".to_string(),
+                props: input_props,
+                style_refs: vec![],
+                children: vec![],
+                source: source(),
+            },
+            IrNode {
+                id: "n_button_dup".to_string(),
+                kind: "element".to_string(),
+                name: "Button".to_string(),
+                props: button_dup_props,
+                style_refs: vec![],
+                children: vec![],
+                source: source(),
+            },
+        ],
+        styles: vec![],
+        diagnostics: vec![],
+    }
+}
+
 fn file<'a>(output: &'a BackendOutput, path: &str) -> &'a str {
     output
         .files
@@ -132,6 +234,10 @@ fn desktop_backend_emits_native_bundle_plus_ir() {
         .files
         .iter()
         .any(|f| f.path == "native-app/src/main.rs"));
+    assert!(output
+        .files
+        .iter()
+        .any(|f| f.path == "native-app/src/actions.rs"));
     assert!(output
         .files
         .iter()
@@ -225,13 +331,14 @@ fn rust_runtime_stub_exposes_host_and_state_bridge() {
 }
 
 #[test]
-fn native_scaffold_uses_egui_and_embeds_bundle_path() {
+fn native_scaffold_uses_dioxus_dom_and_embeds_bundle_path() {
     let output = DesktopBackend
         .emit(&sample_ir())
         .expect("desktop emit should succeed");
 
     let cargo = file(&output, "native-app/Cargo.toml");
     let main_rs = file(&output, "native-app/src/main.rs");
+    let actions_rs = file(&output, "native-app/src/actions.rs");
     let app_rs = file(&output, "native-app/src/app.rs");
     let model_rs = file(&output, "native-app/src/model.rs");
     let style_rs = file(&output, "native-app/src/style.rs");
@@ -242,64 +349,63 @@ fn native_scaffold_uses_egui_and_embeds_bundle_path() {
     let render_controls_rs = file(&output, "native-app/src/render/controls.rs");
     let render_media_rs = file(&output, "native-app/src/render/media.rs");
 
-    assert!(cargo.contains("eframe"));
+    assert!(cargo.contains("dioxus"));
+    assert!(cargo.contains("dioxus-desktop"));
     assert!(main_rs.contains("mod app;"));
+    assert!(main_rs.contains("mod actions;"));
+    assert!(actions_rs.contains("pub struct ActionEvent"));
+    assert!(actions_rs.contains("pub fn invoke("));
+    assert!(actions_rs.contains("pub fn set_state("));
+    assert!(actions_rs.contains("pub fn eval_set_expression("));
+    assert!(actions_rs.contains("pub fn eval_set_expression_rpn("));
     assert!(main_rs.contains("mod style;"));
     assert!(main_rs.contains("mod render;"));
     assert!(app_rs.contains("include_str!(\"../../app.native.json\")"));
-    assert!(app_rs.contains("struct FormoNativeApp"));
-    assert!(app_rs.contains("impl eframe::App for FormoNativeApp"));
-    assert!(app_rs.contains("fn configure_theme("));
-    assert!(app_rs.contains("ctx.set_visuals(visuals);"));
-    assert!(app_rs.contains("visuals.widgets.inactive.rounding"));
-    assert!(app_rs.contains("TextStyle::Body"));
+    assert!(app_rs.contains("dioxus_desktop::launch(AppRoot);"));
+    assert!(app_rs.contains("use_signal"));
+    assert!(app_rs.contains("Action log"));
+    assert!(app_rs.contains("render_node("));
     assert!(app_rs.contains("Desktop parity warnings:"));
     assert!(model_rs.contains("pub diagnostics: Vec<NativeDiagnostic>"));
-    assert!(style_rs.contains("pub struct RenderStyle"));
-    assert!(style_rs.contains("fn parse_rgb_color("));
-    assert!(style_rs.contains("fn parse_font_weight("));
-    assert!(style_rs.contains("fn parse_len_px("));
-    assert!(style_rs.contains("fn parse_flex_shorthand("));
-    assert!(style_rs.contains("pub flex_grow: Option<f32>"));
-    assert!(style_rs.contains("pub flex_basis: Option<f32>"));
-    assert!(style_rs.contains("fn parse_box_shadow("));
-    assert!(style_rs.contains("fn parse_border_shorthand("));
-    assert!(style_rs.contains("map_or("));
-    assert!(style_rs.contains("parse_align(raw).unwrap_or(AlignMode::Start)"));
-    assert!(style_rs.contains("\"baseline\""));
-    assert!(style_rs.contains("\"self-start\""));
-    assert!(style_rs.contains("\"self-end\""));
-    assert!(style_rs.contains("pub display_flex: bool"));
-    assert!(render_mod_rs.contains("\"Checkbox\" =>"));
-    assert!(render_mod_rs.contains("\"Switch\" =>"));
-    assert!(render_mod_rs.contains("\"Modal\" =>"));
-    assert!(render_mod_rs.contains("\"Image\" =>"));
-    assert!(render_mod_rs.contains("\"If\" =>"));
-    assert!(render_mod_rs.contains("\"For\" =>"));
-    assert!(render_mod_rs.contains("\"Stack\" =>"));
-    assert!(render_mod_rs.contains("flow::render_block("));
-    assert!(render_mod_rs.contains("\"Scroll\" => flow::render_scroll("));
-    assert!(render_shared_rs.contains("fn layout_from_style("));
-    assert!(render_shared_rs.contains("let has_explicit_main_size = match flow"));
-    assert!(render_shared_rs.contains("JustifyMode::Space if has_explicit_main_size"));
-    assert!(render_shared_rs.contains("fn apply_gap("));
-    assert!(render_state_rs.contains("fn emit_action("));
+    assert!(style_rs.contains("pub fn runtime_css()"));
+    assert!(style_rs.contains("pub fn widget_class("));
+    assert!(style_rs.contains("pub fn style_attr("));
+    assert!(render_mod_rs.contains("pub fn render_node("));
+    assert!(render_mod_rs.contains("controls::render_checkbox_html("));
+    assert!(render_mod_rs.contains("controls::render_switch_html("));
+    assert!(render_mod_rs.contains("media::render_modal_html("));
+    assert!(render_mod_rs.contains("flow::render_if_html("));
+    assert!(render_mod_rs.contains("flow::render_for_html("));
+    assert!(render_shared_rs.contains("pub(super) fn node_class("));
+    assert!(render_shared_rs.contains("pub(super) fn node_style("));
+    assert!(render_shared_rs.contains("pub(super) fn escape_attr("));
+    assert!(render_state_rs.contains("fn resolve_scoped_value("));
     assert!(render_state_rs.contains("fn derive_for_item_key("));
-    assert!(render_state_rs.contains("fn prop_usize("));
-    assert!(render_flow_rs.contains("fn render_block("));
-    assert!(render_flow_rs.contains("fn render_scroll("));
-    assert!(render_flow_rs.contains("fn render_flex_children("));
-    assert!(render_flow_rs.contains("fn child_main_basis("));
-    assert!(render_flow_rs.contains("apply_gap(ui, style.gap, None);"));
-    assert!(render_flow_rs.contains("fn render_if("));
-    assert!(render_flow_rs.contains("fn render_for("));
+    assert!(render_state_rs.contains("fn dispatch_action("));
+    assert!(render_state_rs.contains("crate::actions::invoke("));
+    assert!(render_flow_rs.contains("fn render_container_html("));
+    assert!(render_flow_rs.contains("fn render_if_html("));
+    assert!(render_flow_rs.contains("fn render_for_html("));
     assert!(render_flow_rs.contains("{}Key"));
-    assert!(render_controls_rs.contains("fn render_input("));
-    assert!(render_media_rs.contains("fn render_modal("));
-    assert!(render_media_rs.contains("egui::Key::Escape"));
-    assert!(render_media_rs.contains("egui::Sense::click()"));
-    assert!(render_media_rs.contains(".max_width(max_modal_width)"));
-    assert!(render_media_rs.contains("ScrollArea::vertical()"));
+    assert!(render_controls_rs.contains("fn render_input_html("));
+    assert!(render_controls_rs.contains("fn render_switch_html("));
+    assert!(render_controls_rs.contains("fn render_button_html("));
+    assert!(render_media_rs.contains("fn render_modal_html("));
+    assert!(render_media_rs.contains("formo-modal-body"));
+}
+
+#[test]
+fn native_scaffold_actions_registry_is_generated_from_ir_props() {
+    let output = DesktopBackend
+        .emit(&sample_ir_with_actions())
+        .expect("desktop emit should succeed");
+
+    let actions_rs = file(&output, "native-app/src/actions.rs");
+    assert!(actions_rs.contains("\"saveForm\" => handle_save_form"));
+    assert!(actions_rs.contains("\"search:update\" => handle_search_update"));
+    assert!(actions_rs.contains("fn handle_save_form("));
+    assert!(actions_rs.contains("fn handle_search_update("));
+    assert_eq!(actions_rs.matches("\"saveForm\" =>").count(), 1);
 }
 
 #[test]
@@ -329,4 +435,11 @@ fn kebab_case_name_is_stable_for_entry_component() {
     assert_eq!(to_kebab_case("AppMain"), "app-main");
     assert_eq!(to_kebab_case("app main"), "app-main");
     assert_eq!(to_kebab_case(""), "formo-desktop-app");
+}
+
+#[test]
+fn snake_case_name_is_stable_for_action_handlers() {
+    assert_eq!(to_snake_case("saveForm"), "save_form");
+    assert_eq!(to_snake_case("search:update"), "search_update");
+    assert_eq!(to_snake_case(""), "");
 }

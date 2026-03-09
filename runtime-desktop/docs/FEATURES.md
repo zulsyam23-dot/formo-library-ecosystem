@@ -11,6 +11,7 @@ Daftar fitur runtime desktop Formo yang wajib tersedia di library ini.
      - `native-app/src/main.rs`, `native-app/src/app.rs`
      - `native-app/src/model.rs`, `native-app/src/style.rs`
      - `native-app/src/render/mod.rs`, `native-app/src/render/*.rs`
+   - Runtime scaffold berbasis `dioxus-desktop` dengan renderer tree DOM + CSS inline.
 3. `desktop_style_parity_core`
    - Mapper style inti untuk desktop native (canonical-first via `effective_style_decls(...)`):
      - visual: `color`, `background`, `border`, `border-radius`, `box-shadow`, `opacity`
@@ -28,6 +29,7 @@ Daftar fitur runtime desktop Formo yang wajib tersedia di library ini.
      - `Modal` interaction parity dasar: close via tombol, backdrop click, dan tombol `Escape`
 5. `desktop_host_actions`
    - Kontrak action host Rust via `FormoDesktopHost::invoke_action(...)`.
+   - Scaffold `native-app/src/actions.rs` meng-generate registry handler berdasarkan action props yang terdeteksi dari IR (`onPress/onClick/onChange/onClose/action`).
 6. `desktop_state_bridge`
    - Helper state bridge Rust: `set_state_patch(...)` dan `replace_state(...)`.
 7. `ir_snapshot_emit`

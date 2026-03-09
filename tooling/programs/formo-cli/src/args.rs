@@ -70,7 +70,7 @@ pub fn print_help() {
     println!("  fmt [input|--input file] [--check] [--stdout]");
     println!("  doctor [input|--input file] [--json] [--json-pretty] [--json-schema]");
     println!(
-        "  build [--target web|desktop|multi] [--input file] [--out dir] [--watch] [--prod] [--release-exe] [--strict-parity] [--strict-engine]"
+        "  build [--target web|desktop|multi] [--input file] [--out dir] [--watch] [--prod] [--release-exe] [--strict] [--strict-parity] [--strict-engine]"
     );
     println!(
         "    note: web/desktop target tersedia jika feature backend-web/backend-desktop aktif."
@@ -78,6 +78,39 @@ pub fn print_help() {
     println!(
         "  bench [--input file] [--iterations N] [--warmup N] [--nodes N] [--out file] [--json-pretty] [--max-compile-p95-ms N] [--max-first-render-p95-ms N]"
     );
+}
+
+fn take_option_value(args: &[String], i: &mut usize, option: &str) -> Result<String, CliError> {
+    *i += 1;
+    let value = args
+        .get(*i)
+        .ok_or_else(|| CliError::new(format!("missing value for {option}")))?;
+    if value.starts_with("--") {
+        return Err(CliError::new(format!("missing value for {option}")));
+    }
+    if value.trim().is_empty() {
+        return Err(CliError::new(format!(
+            "value for {option} must not be empty"
+        )));
+    }
+    Ok(value.to_string())
+}
+
+fn set_unique(slot: &mut Option<String>, value: String, option: &str) -> Result<(), CliError> {
+    if slot.is_some() {
+        return Err(CliError::new(format!("duplicate option: {option}")));
+    }
+    *slot = Some(value);
+    Ok(())
+}
+
+fn validate_build_target(target: &str) -> Result<(), CliError> {
+    match target {
+        "web" | "desktop" | "multi" => Ok(()),
+        _ => Err(CliError::new(format!(
+            "invalid value for --target `{target}`: expected `web`, `desktop`, or `multi`"
+        ))),
+    }
 }
 
 pub fn parse_logic_args(args: &[String]) -> Result<LogicArgs, CliError> {
@@ -97,29 +130,18 @@ pub fn parse_logic_args(args: &[String]) -> Result<LogicArgs, CliError> {
                 json_pretty = true;
             }
             "--input" => {
-                i += 1;
-                let value = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --input"))?;
-                input = Some(value.to_string());
+                let value = take_option_value(args, &mut i, "--input")?;
+                set_unique(&mut input, value, "--input")?;
             }
             "--rt-manifest-out" => {
-                i += 1;
-                let value = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --rt-manifest-out"))?;
-                rt_manifest_out = Some(value.to_string());
+                let value = take_option_value(args, &mut i, "--rt-manifest-out")?;
+                set_unique(&mut rt_manifest_out, value, "--rt-manifest-out")?;
             }
             other if other.starts_with("--") => {
                 return Err(CliError::new(format!("unknown option: {other}")));
             }
             other => {
-                if input.is_some() {
-                    return Err(CliError::new(format!(
-                        "multiple input values are not allowed: `{other}`"
-                    )));
-                }
-                input = Some(other.to_string());
+                set_unique(&mut input, other.to_string(), "input")?;
             }
         }
         i += 1;
@@ -163,22 +185,14 @@ pub fn parse_check_args(args: &[String]) -> Result<CheckArgs, CliError> {
                 lsp = true;
             }
             "--input" => {
-                i += 1;
-                let value = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --input"))?;
-                input = Some(value.to_string());
+                let value = take_option_value(args, &mut i, "--input")?;
+                set_unique(&mut input, value, "--input")?;
             }
             other if other.starts_with("--") => {
                 return Err(CliError::new(format!("unknown option: {other}")));
             }
             other => {
-                if input.is_some() {
-                    return Err(CliError::new(format!(
-                        "multiple input values are not allowed: `{other}`"
-                    )));
-                }
-                input = Some(other.to_string());
+                set_unique(&mut input, other.to_string(), "input")?;
             }
         }
         i += 1;
@@ -195,9 +209,9 @@ pub fn parse_check_args(args: &[String]) -> Result<CheckArgs, CliError> {
 }
 
 pub fn parse_build_args(args: &[String]) -> Result<BuildArgs, CliError> {
-    let mut target = "web".to_string();
-    let mut input = "main.fm".to_string();
-    let mut out_dir = "dist".to_string();
+    let mut target: Option<String> = None;
+    let mut input: Option<String> = None;
+    let mut out_dir: Option<String> = None;
     let mut watch = false;
     let mut prod = false;
     let mut release_exe = false;
@@ -208,25 +222,16 @@ pub fn parse_build_args(args: &[String]) -> Result<BuildArgs, CliError> {
     while i < args.len() {
         match args[i].as_str() {
             "--target" => {
-                i += 1;
-                target = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --target"))?
-                    .to_string();
+                let value = take_option_value(args, &mut i, "--target")?;
+                set_unique(&mut target, value, "--target")?;
             }
             "--input" => {
-                i += 1;
-                input = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --input"))?
-                    .to_string();
+                let value = take_option_value(args, &mut i, "--input")?;
+                set_unique(&mut input, value, "--input")?;
             }
             "--out" => {
-                i += 1;
-                out_dir = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --out"))?
-                    .to_string();
+                let value = take_option_value(args, &mut i, "--out")?;
+                set_unique(&mut out_dir, value, "--out")?;
             }
             "--watch" => {
                 watch = true;
@@ -243,12 +248,21 @@ pub fn parse_build_args(args: &[String]) -> Result<BuildArgs, CliError> {
             "--strict-engine" => {
                 strict_engine = true;
             }
+            "--strict" => {
+                strict_parity = true;
+                strict_engine = true;
+            }
             other => {
                 return Err(CliError::new(format!("unknown option: {other}")));
             }
         }
         i += 1;
     }
+
+    let target = target.unwrap_or_else(|| "web".to_string());
+    validate_build_target(&target)?;
+    let input = input.unwrap_or_else(|| "main.fm".to_string());
+    let out_dir = out_dir.unwrap_or_else(|| "dist".to_string());
 
     Ok(BuildArgs {
         target,
@@ -283,22 +297,14 @@ pub fn parse_doctor_args(args: &[String]) -> Result<DoctorArgs, CliError> {
                 json_schema = true;
             }
             "--input" => {
-                i += 1;
-                let value = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --input"))?;
-                input = Some(value.to_string());
+                let value = take_option_value(args, &mut i, "--input")?;
+                set_unique(&mut input, value, "--input")?;
             }
             other if other.starts_with("--") => {
                 return Err(CliError::new(format!("unknown option: {other}")));
             }
             other => {
-                if input.is_some() {
-                    return Err(CliError::new(format!(
-                        "multiple input values are not allowed: `{other}`"
-                    )));
-                }
-                input = Some(other.to_string());
+                set_unique(&mut input, other.to_string(), "input")?;
             }
         }
         i += 1;
@@ -327,22 +333,14 @@ pub fn parse_fmt_args(args: &[String]) -> Result<FmtArgs, CliError> {
                 stdout = true;
             }
             "--input" => {
-                i += 1;
-                let value = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --input"))?;
-                input = Some(value.to_string());
+                let value = take_option_value(args, &mut i, "--input")?;
+                set_unique(&mut input, value, "--input")?;
             }
             other if other.starts_with("--") => {
                 return Err(CliError::new(format!("unknown option: {other}")));
             }
             other => {
-                if input.is_some() {
-                    return Err(CliError::new(format!(
-                        "multiple input values are not allowed: `{other}`"
-                    )));
-                }
-                input = Some(other.to_string());
+                set_unique(&mut input, other.to_string(), "input")?;
             }
         }
         i += 1;
@@ -366,22 +364,14 @@ pub fn parse_lsp_args(args: &[String]) -> Result<LspArgs, CliError> {
                 watch = true;
             }
             "--input" => {
-                i += 1;
-                let value = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --input"))?;
-                input = Some(value.to_string());
+                let value = take_option_value(args, &mut i, "--input")?;
+                set_unique(&mut input, value, "--input")?;
             }
             other if other.starts_with("--") => {
                 return Err(CliError::new(format!("unknown option: {other}")));
             }
             other => {
-                if input.is_some() {
-                    return Err(CliError::new(format!(
-                        "multiple input values are not allowed: `{other}`"
-                    )));
-                }
-                input = Some(other.to_string());
+                set_unique(&mut input, other.to_string(), "input")?;
             }
         }
         i += 1;
@@ -394,11 +384,11 @@ pub fn parse_lsp_args(args: &[String]) -> Result<LspArgs, CliError> {
 }
 
 pub fn parse_benchmark_args(args: &[String]) -> Result<BenchmarkArgs, CliError> {
-    let mut input = "main.fm".to_string();
-    let mut iterations = 20usize;
-    let mut warmup = 3usize;
-    let mut nodes = 1000usize;
-    let mut out = "dist-ci/bench/benchmark.json".to_string();
+    let mut input: Option<String> = None;
+    let mut iterations: Option<usize> = None;
+    let mut warmup: Option<usize> = None;
+    let mut nodes: Option<usize> = None;
+    let mut out: Option<String> = None;
     let mut json_pretty = false;
     let mut max_compile_p95_ms: Option<f64> = None;
     let mut max_first_render_p95_ms: Option<f64> = None;
@@ -407,60 +397,57 @@ pub fn parse_benchmark_args(args: &[String]) -> Result<BenchmarkArgs, CliError> 
     while i < args.len() {
         match args[i].as_str() {
             "--input" => {
-                i += 1;
-                input = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --input"))?
-                    .to_string();
+                let value = take_option_value(args, &mut i, "--input")?;
+                set_unique(&mut input, value, "--input")?;
             }
             "--iterations" => {
-                i += 1;
-                let raw = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --iterations"))?;
-                iterations = raw
+                if iterations.is_some() {
+                    return Err(CliError::new("duplicate option: --iterations"));
+                }
+                let raw = take_option_value(args, &mut i, "--iterations")?;
+                let parsed = raw
                     .parse::<usize>()
                     .map_err(|_| CliError::new("`--iterations` must be a positive integer"))?;
-                if iterations == 0 {
+                if parsed == 0 {
                     return Err(CliError::new("`--iterations` must be greater than 0"));
                 }
+                iterations = Some(parsed);
             }
             "--warmup" => {
-                i += 1;
-                let raw = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --warmup"))?;
-                warmup = raw
+                if warmup.is_some() {
+                    return Err(CliError::new("duplicate option: --warmup"));
+                }
+                let raw = take_option_value(args, &mut i, "--warmup")?;
+                let parsed = raw
                     .parse::<usize>()
                     .map_err(|_| CliError::new("`--warmup` must be a non-negative integer"))?;
+                warmup = Some(parsed);
             }
             "--nodes" => {
-                i += 1;
-                let raw = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --nodes"))?;
-                nodes = raw
+                if nodes.is_some() {
+                    return Err(CliError::new("duplicate option: --nodes"));
+                }
+                let raw = take_option_value(args, &mut i, "--nodes")?;
+                let parsed = raw
                     .parse::<usize>()
                     .map_err(|_| CliError::new("`--nodes` must be a positive integer"))?;
-                if nodes == 0 {
+                if parsed == 0 {
                     return Err(CliError::new("`--nodes` must be greater than 0"));
                 }
+                nodes = Some(parsed);
             }
             "--out" => {
-                i += 1;
-                out = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --out"))?
-                    .to_string();
+                let value = take_option_value(args, &mut i, "--out")?;
+                set_unique(&mut out, value, "--out")?;
             }
             "--json-pretty" => {
                 json_pretty = true;
             }
             "--max-compile-p95-ms" => {
-                i += 1;
-                let raw = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --max-compile-p95-ms"))?;
+                if max_compile_p95_ms.is_some() {
+                    return Err(CliError::new("duplicate option: --max-compile-p95-ms"));
+                }
+                let raw = take_option_value(args, &mut i, "--max-compile-p95-ms")?;
                 let parsed = raw.parse::<f64>().map_err(|_| {
                     CliError::new("`--max-compile-p95-ms` must be a positive number")
                 })?;
@@ -472,10 +459,10 @@ pub fn parse_benchmark_args(args: &[String]) -> Result<BenchmarkArgs, CliError> 
                 max_compile_p95_ms = Some(parsed);
             }
             "--max-first-render-p95-ms" => {
-                i += 1;
-                let raw = args
-                    .get(i)
-                    .ok_or_else(|| CliError::new("missing value for --max-first-render-p95-ms"))?;
+                if max_first_render_p95_ms.is_some() {
+                    return Err(CliError::new("duplicate option: --max-first-render-p95-ms"));
+                }
+                let raw = take_option_value(args, &mut i, "--max-first-render-p95-ms")?;
                 let parsed = raw.parse::<f64>().map_err(|_| {
                     CliError::new("`--max-first-render-p95-ms` must be a positive number")
                 })?;
@@ -493,6 +480,17 @@ pub fn parse_benchmark_args(args: &[String]) -> Result<BenchmarkArgs, CliError> 
         i += 1;
     }
 
+    let input = input.unwrap_or_else(|| "main.fm".to_string());
+    let iterations = iterations.unwrap_or(20usize);
+    let warmup = warmup.unwrap_or(3usize);
+    if warmup > iterations {
+        return Err(CliError::new(
+            "`--warmup` must be less than or equal to `--iterations`",
+        ));
+    }
+    let nodes = nodes.unwrap_or(1000usize);
+    let out = out.unwrap_or_else(|| "dist-ci/bench/benchmark.json".to_string());
+
     Ok(BenchmarkArgs {
         input,
         iterations,
@@ -507,7 +505,7 @@ pub fn parse_benchmark_args(args: &[String]) -> Result<BenchmarkArgs, CliError> 
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_build_args, parse_logic_args};
+    use super::{parse_build_args, parse_check_args, parse_logic_args};
 
     #[test]
     fn parse_build_args_reads_release_exe_flag() {
@@ -565,6 +563,42 @@ mod tests {
     }
 
     #[test]
+    fn parse_build_args_reads_strict_bundle_flag() {
+        let args = vec!["--strict".to_string()];
+        let parsed = parse_build_args(&args).expect("build args should parse");
+        assert!(parsed.strict_parity);
+        assert!(parsed.strict_engine);
+    }
+
+    #[test]
+    fn parse_build_args_rejects_invalid_target() {
+        let args = vec!["--target".to_string(), "ios".to_string()];
+        let err = match parse_build_args(&args) {
+            Ok(_) => panic!("build args should fail"),
+            Err(err) => err,
+        };
+        assert!(
+            err.message.contains("invalid value for --target"),
+            "unexpected message: {}",
+            err.message
+        );
+    }
+
+    #[test]
+    fn parse_check_args_rejects_missing_input_value_when_next_token_is_flag() {
+        let args = vec!["--input".to_string(), "--json".to_string()];
+        let err = match parse_check_args(&args) {
+            Ok(_) => panic!("check args should fail"),
+            Err(err) => err,
+        };
+        assert!(
+            err.message.contains("missing value for --input"),
+            "unexpected message: {}",
+            err.message
+        );
+    }
+
+    #[test]
     fn parse_logic_args_reads_json_pretty_and_input() {
         let args = vec![
             "--input".to_string(),
@@ -591,6 +625,24 @@ mod tests {
         assert_eq!(
             parsed.rt_manifest_out.as_deref(),
             Some("dist/logic.manifest.json")
+        );
+    }
+
+    #[test]
+    fn parse_logic_args_rejects_duplicate_input_sources() {
+        let args = vec![
+            "--input".to_string(),
+            "logic/main.fl".to_string(),
+            "logic/other.fl".to_string(),
+        ];
+        let err = match parse_logic_args(&args) {
+            Ok(_) => panic!("logic args should fail"),
+            Err(err) => err,
+        };
+        assert!(
+            err.message.contains("duplicate option: input"),
+            "unexpected message: {}",
+            err.message
         );
     }
 }

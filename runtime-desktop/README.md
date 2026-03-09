@@ -1,14 +1,16 @@
 # Library: runtime-desktop
 
-`runtime-desktop` adalah backend emitter Formo untuk target native desktop Rust.
+`runtime-desktop` adalah backend emitter Formo untuk target native desktop Rust berbasis `dioxus`.
 
 ## Apa yang Ditangani
 
 - emit bundle native: `app.native.json`, `app.native.rs`, `app.ir.json`
 - generate scaffold runnable app: `native-app/*`
+- scaffold UI desktop memakai `dioxus-desktop` (DOM + CSS style mapping)
 - parity diagnostics untuk gap style/widget desktop
 - readable artifacts untuk inspeksi AI/manusia
 - bridge action/state untuk host desktop
+- auto-generate `native-app/src/actions.rs` dari action props IR
 - runtime style resolver canonical (`effective_style_decls`) agar baseline web/desktop konsisten
 - flex sizing parity phase-2 (`flex`, `flex-grow`, `flex-shrink`, `flex-basis`)
 
@@ -53,6 +55,7 @@ Sumber: `contracts/CAPABILITIES.json`.
 ## Catatan Parity Engine
 
 - Backend desktop membaca style lewat `formo_ir::effective_style_decls(...)`.
+- Scaffold desktop memetakan `resolvedStyle` ke inline CSS agar perilaku visual lebih dekat ke runtime web.
 - `justify-content: space-*` hanya mendistribusikan ruang jika ada ukuran main-axis eksplisit.
 - `%` pada `width/min/max-width` didukung langsung; `%` pada `height` diproses konservatif untuk menjaga stabilitas layout.
 

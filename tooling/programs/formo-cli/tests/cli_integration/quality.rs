@@ -303,3 +303,46 @@ fn invalid_inputs_fail_as_diagnostics_not_rust_panic() {
         .expect("check --json bad utf8 should return JSON");
     assert_eq!(bad_utf8_payload["ok"], Value::Bool(false));
 }
+
+#[test]
+fn commands_fail_fast_for_invalid_input_extensions() {
+    let workspace = TempWorkspace::new("formo_cli_invalid_input_extension");
+    write_file(
+        workspace.path(),
+        "main.txt",
+        r#"component App() {
+  <Page/>
+}
+"#,
+    );
+    write_file(
+        workspace.path(),
+        "logic/main.txt",
+        r#"module AppController;
+
+logic AppController {
+  event startApp {
+    action emit "READY";
+  }
+}
+"#,
+    );
+
+    let check = run_formo(workspace.path(), &["check", "--input", "main.txt"]);
+    assert!(!check.status.success(), "check must fail for .txt input");
+    let check_stderr = String::from_utf8_lossy(&check.stderr);
+    assert!(
+        check_stderr.contains("`check` expects input file with `.fm` extension"),
+        "expected extension guard in stderr, got: {check_stderr}"
+    );
+    assert_no_rust_panic(&check);
+
+    let logic = run_formo(workspace.path(), &["logic", "--input", "logic/main.txt"]);
+    assert!(!logic.status.success(), "logic must fail for .txt input");
+    let logic_stderr = String::from_utf8_lossy(&logic.stderr);
+    assert!(
+        logic_stderr.contains("`logic` expects input file with `.fl` extension"),
+        "expected extension guard in stderr, got: {logic_stderr}"
+    );
+    assert_no_rust_panic(&logic);
+}

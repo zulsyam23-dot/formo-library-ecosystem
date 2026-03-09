@@ -213,19 +213,10 @@ fn canonical_style_value(key: &str, value: &Value) -> Value {
 
 fn canonical_align_value(raw: &str) -> &'static str {
     match raw {
-        "start"
-        | "flex-start"
-        | "left"
-        | "top"
-        | "baseline"
-        | "normal"
-        | "self-start"
-        | "safe start"
-        | "unsafe start" => "start",
+        "start" | "flex-start" | "left" | "top" | "baseline" | "normal" | "self-start"
+        | "safe start" | "unsafe start" => "start",
         "center" => "center",
-        "end" | "flex-end" | "right" | "bottom" | "self-end" | "safe end" | "unsafe end" => {
-            "end"
-        }
+        "end" | "flex-end" | "right" | "bottom" | "self-end" | "safe end" | "unsafe end" => "end",
         "stretch" => "stretch",
         _ => "start",
     }

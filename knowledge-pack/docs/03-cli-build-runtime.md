@@ -43,6 +43,10 @@ Opsi:
 - `--json-schema`
 - `--watch`
 
+Catatan input:
+
+- `check` fail-fast jika input bukan file `.fm`.
+
 ## 3) `logic`
 
 Tujuan:
@@ -60,6 +64,10 @@ Opsi:
 - `--json`
 - `--json-pretty`
 - `--rt-manifest-out <file>`
+
+Catatan input:
+
+- `logic` fail-fast jika input bukan file `.fl`.
 
 Deklarasi standar unit `.fl`:
 
@@ -220,6 +228,7 @@ Opsi:
 - `--watch`
 - `--prod`
 - `--release-exe` (khusus `desktop`/`multi`)
+- `--strict` (preset gabungan: `--strict-parity` + `--strict-engine`)
 - `--strict-parity` (berlaku untuk `web|desktop|multi`, build gagal jika ada parity warning desktop)
   - pada target `web`, audit parity desktop membutuhkan feature `backend-desktop`
 - `--strict-engine` (berlaku untuk `web|desktop|multi`, build gagal jika audit bridge `FM/FS/FL` masih ada warning)

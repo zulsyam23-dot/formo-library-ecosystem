@@ -180,8 +180,8 @@ fn write_parity_report(path: &str, diagnostics: &[serde_json::Value]) -> Result<
         "diagnostics": diagnostics,
     });
 
-    let text =
-        serde_json::to_string_pretty(&payload).map_err(|err| format!("cannot serialize parity report: {err}"))?;
+    let text = serde_json::to_string_pretty(&payload)
+        .map_err(|err| format!("cannot serialize parity report: {err}"))?;
     if let Some(parent) = Path::new(path).parent() {
         if !parent.exists() {
             fs::create_dir_all(parent)

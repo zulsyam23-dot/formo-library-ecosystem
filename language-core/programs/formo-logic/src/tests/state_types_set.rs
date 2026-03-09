@@ -381,6 +381,62 @@ logic AppController {
 }
 
 #[test]
+fn parse_set_expression_rpn_preserves_operator_precedence() {
+    let src = r#"
+module AppController;
+logic AppController {
+  state {
+    count: int = 0;
+  }
+  event increment {
+    action set count = count + 1 * 2;
+  }
+}
+"#;
+
+    let ast = parse(src).expect("expression with precedence should parse");
+    let action = &ast.units[0].events[0].actions[0];
+    assert_eq!(
+        action.set_expression_rpn,
+        vec![
+            LogicSetExprToken::Operand(LogicSetOperand::StateRef("count".to_string())),
+            LogicSetExprToken::Operand(LogicSetOperand::IntLiteral("1".to_string())),
+            LogicSetExprToken::Operand(LogicSetOperand::IntLiteral("2".to_string())),
+            LogicSetExprToken::Operator(LogicSetOperator::Mul),
+            LogicSetExprToken::Operator(LogicSetOperator::Add),
+        ]
+    );
+}
+
+#[test]
+fn parse_set_expression_rpn_preserves_parentheses_order() {
+    let src = r#"
+module AppController;
+logic AppController {
+  state {
+    count: int = 0;
+  }
+  event weighted {
+    action set count = (count + 1) * 2;
+  }
+}
+"#;
+
+    let ast = parse(src).expect("expression with parentheses should parse");
+    let action = &ast.units[0].events[0].actions[0];
+    assert_eq!(
+        action.set_expression_rpn,
+        vec![
+            LogicSetExprToken::Operand(LogicSetOperand::StateRef("count".to_string())),
+            LogicSetExprToken::Operand(LogicSetOperand::IntLiteral("1".to_string())),
+            LogicSetExprToken::Operator(LogicSetOperator::Add),
+            LogicSetExprToken::Operand(LogicSetOperand::IntLiteral("2".to_string())),
+            LogicSetExprToken::Operator(LogicSetOperator::Mul),
+        ]
+    );
+}
+
+#[test]
 fn reject_type_alias_without_pascal_case() {
     let src = r#"
 module AppController;

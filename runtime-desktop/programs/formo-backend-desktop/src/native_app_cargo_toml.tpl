@@ -6,6 +6,7 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-eframe = "0.27"
+dioxus = { version = "0.5", features = ["desktop"] }
+dioxus-desktop = "0.5"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

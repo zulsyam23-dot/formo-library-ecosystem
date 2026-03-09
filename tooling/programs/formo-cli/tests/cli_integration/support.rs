@@ -324,6 +324,120 @@ component App() {
     );
 }
 
+pub(crate) fn create_desktop_actions_sample(root: &Path) {
+    write_file(
+        root,
+        "main.fm",
+        r#"component App(query: state<string>, run: action<void>, search: action<string>) {
+  <Page>
+    <Button label="Save" onPress=run/>
+    <Input value=query onChange=search/>
+  </Page>
+}
+"#,
+    );
+}
+
+pub(crate) fn create_desktop_actions_sample_with_logic(root: &Path) {
+    write_file(
+        root,
+        "main.fm",
+        r#"component App(query: state<string>, run: action<void>, search: action<string>) {
+  <Page>
+    <Button label="Run" onPress=run/>
+    <Input value=query onChange=search/>
+  </Page>
+}
+"#,
+    );
+
+    write_file(
+        root,
+        "logic/controllers/app_controller.fl",
+        r#"module AppController;
+
+logic AppController {
+  state {
+    query: string = "";
+  }
+
+  event run {
+    action emit "RUN";
+  }
+
+  event search {
+    action emit "SEARCH";
+  }
+
+  event syncCache {
+    action set query = query;
+  }
+}
+"#,
+    );
+}
+
+pub(crate) fn create_desktop_actions_expression_sample(root: &Path) {
+    write_file(
+        root,
+        "main.fm",
+        r#"component App(increment: action<void>, weighted: action<void>) {
+  <Page>
+    <Button label="Increment" onPress=increment/>
+    <Button label="Weighted" onPress=weighted/>
+  </Page>
+}
+"#,
+    );
+
+    write_file(
+        root,
+        "logic/controllers/app_controller.fl",
+        r#"module AppController;
+
+logic AppController {
+  state {
+    count: int = 0;
+  }
+
+  event increment {
+    action set count = count + 1 * 2;
+  }
+
+  event weighted {
+    action set count = (count + 1) * 2;
+  }
+}
+"#,
+    );
+}
+
+pub(crate) fn create_action_logic_mismatch_sample(root: &Path) {
+    write_file(
+        root,
+        "main.fm",
+        r#"component App(run: action<void>) {
+  <Page>
+    <Button label="Run" onPress=run/>
+  </Page>
+}
+"#,
+    );
+
+    write_file(
+        root,
+        "logic/controllers/app_controller.fl",
+        r#"module AppController;
+
+logic AppController {
+  event startApp {
+    action emit "READY";
+  }
+}
+"#,
+    );
+}
+
 pub(crate) fn create_parser_recovery_sample(root: &Path) {
     write_file(
         root,

@@ -129,7 +129,7 @@ pub(in crate::analyzer) fn tokenize(source: &str) -> Vec<Tok> {
                     out.push(chars[i]);
                     i += 1;
                 }
-                tokens.push(Tok::StringLit);
+                tokens.push(Tok::StringLit(out));
             }
             c if c.is_ascii_digit() => {
                 let mut out = String::new();

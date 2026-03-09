@@ -63,10 +63,10 @@ pub enum LogicSetValueHint {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LogicSetOperand {
     StateRef(String),
-    BoolLiteral,
-    StringLiteral,
-    IntLiteral,
-    FloatLiteral,
+    BoolLiteral(bool),
+    StringLiteral(String),
+    IntLiteral(String),
+    FloatLiteral(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -87,6 +87,12 @@ pub enum LogicSetOperator {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub enum LogicSetExprToken {
+    Operand(LogicSetOperand),
+    Operator(LogicSetOperator),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LogicAction {
     pub kind: LogicActionKind,
     pub scope: LogicScope,
@@ -94,6 +100,7 @@ pub struct LogicAction {
     pub set_value_hint: Option<LogicSetValueHint>,
     pub set_operands: Vec<LogicSetOperand>,
     pub set_operators: Vec<LogicSetOperator>,
+    pub set_expression_rpn: Vec<LogicSetExprToken>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

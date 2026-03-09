@@ -90,7 +90,7 @@ pub(in crate::analyzer) fn validate_state_initializer(
             ))
         }
         "string" => {
-            if matches!(tokens, [Tok::StringLit]) {
+            if matches!(tokens, [Tok::StringLit(_)]) {
                 Ok(())
             } else {
                 Err(format!(

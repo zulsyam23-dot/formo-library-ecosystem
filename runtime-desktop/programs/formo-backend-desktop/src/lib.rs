@@ -8,6 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 const NATIVE_RUNTIME_STUB_RS: &str = include_str!("native_runtime_stub.rs");
 const NATIVE_APP_CARGO_TOML: &str = include_str!("native_app_cargo_toml.tpl");
 const NATIVE_APP_MAIN_RS: &str = include_str!("native_app_main_rs.tpl");
+const NATIVE_APP_ACTIONS_RS: &str = include_str!("native_app_actions_rs.tpl");
 const NATIVE_APP_APP_RS: &str = include_str!("native_app_app_rs.tpl");
 const NATIVE_APP_MODEL_RS: &str = include_str!("native_app_model_rs.tpl");
 const NATIVE_APP_STYLE_RS: &str = include_str!("native_app_style_rs.tpl");
@@ -30,6 +31,8 @@ impl Backend for DesktopBackend {
         let runtime_stub = render_native_runtime_stub(&native_bundle.entry_component);
         let native_app_cargo_toml = render_native_app_cargo_toml(&native_bundle.entry_component);
         let native_app_main_rs = render_native_app_main_rs();
+        let native_action_handlers = collect_native_action_handlers(ir);
+        let native_app_actions_rs = render_native_app_actions_rs(&native_action_handlers);
         let native_app_app_rs = render_native_app_app_rs(&native_bundle.entry_component);
         let native_app_model_rs = render_native_app_model_rs();
         let native_app_style_rs = render_native_app_style_rs();
@@ -70,6 +73,10 @@ impl Backend for DesktopBackend {
             OutputFile {
                 path: "native-app/src/main.rs".to_string(),
                 content: native_app_main_rs,
+            },
+            OutputFile {
+                path: "native-app/src/actions.rs".to_string(),
+                content: native_app_actions_rs,
             },
             OutputFile {
                 path: "native-app/src/app.rs".to_string(),
@@ -231,6 +238,12 @@ struct NativeNode {
     resolved_style: BTreeMap<String, Value>,
     children: Vec<NativeNode>,
     source: SourceLoc,
+}
+
+#[derive(Debug, Clone)]
+struct NativeActionHandler {
+    action_name: String,
+    fn_name: String,
 }
 
 fn build_native_node(
@@ -458,6 +471,35 @@ fn render_native_app_main_rs() -> String {
     NATIVE_APP_MAIN_RS.to_string()
 }
 
+fn render_native_app_actions_rs(action_handlers: &[NativeActionHandler]) -> String {
+    let action_match_arms = action_handlers
+        .iter()
+        .map(|handler| {
+            format!(
+                "        {:?} => {},\n",
+                handler.action_name, handler.fn_name
+            )
+        })
+        .collect::<String>();
+
+    let action_handler_stubs = if action_handlers.is_empty() {
+        "// No static action names detected from FM props.\n".to_string()
+    } else {
+        let mut out = String::new();
+        for handler in action_handlers {
+            out.push_str(&format!(
+                "fn {}(event: ActionEvent, state_store: Signal<NativeState>) {{\n    let _ = (event, state_store);\n    // TODO: implement action {:?}.\n}}\n\n",
+                handler.fn_name, handler.action_name
+            ));
+        }
+        out
+    };
+
+    NATIVE_APP_ACTIONS_RS
+        .replace("{{ACTION_MATCH_ARMS}}", &action_match_arms)
+        .replace("{{ACTION_HANDLER_STUBS}}", action_handler_stubs.trim_end())
+}
+
 fn render_native_app_app_rs(entry_component: &str) -> String {
     NATIVE_APP_APP_RS.replace("{{ENTRY_COMPONENT}}", entry_component)
 }
@@ -496,6 +538,59 @@ fn render_native_app_render_media_rs() -> String {
 
 fn render_native_app_readme_md(entry_component: &str) -> String {
     NATIVE_APP_README_MD.replace("{{ENTRY_COMPONENT}}", entry_component)
+}
+
+fn collect_native_action_handlers(ir: &IrProgram) -> Vec<NativeActionHandler> {
+    const ACTION_PROP_KEYS: [&str; 5] = ["onPress", "onClick", "onChange", "onClose", "action"];
+
+    let mut action_names = BTreeSet::new();
+    for node in &ir.nodes {
+        for prop_key in ACTION_PROP_KEYS {
+            let Some(prop_value) = node.props.get(prop_key) else {
+                continue;
+            };
+            let Some(raw) = prop_value.v.as_str() else {
+                continue;
+            };
+            let action_name = raw.trim();
+            if action_name.is_empty() {
+                continue;
+            }
+            action_names.insert(action_name.to_string());
+        }
+    }
+
+    let mut used_fn_names = BTreeSet::new();
+    let mut out = Vec::with_capacity(action_names.len());
+
+    for action_name in action_names {
+        let mut base = to_snake_case(&action_name);
+        if base.is_empty() {
+            base = "action".to_string();
+        }
+        if base
+            .chars()
+            .next()
+            .map(|ch| ch.is_ascii_digit())
+            .unwrap_or(false)
+        {
+            base = format!("action_{base}");
+        }
+
+        let mut fn_name = format!("handle_{base}");
+        let mut suffix = 2usize;
+        while !used_fn_names.insert(fn_name.clone()) {
+            fn_name = format!("handle_{base}_{suffix}");
+            suffix += 1;
+        }
+
+        out.push(NativeActionHandler {
+            action_name,
+            fn_name,
+        });
+    }
+
+    out
 }
 
 fn to_pretty_json<T: Serialize>(value: &T) -> Result<String, String> {
@@ -547,6 +642,26 @@ fn to_kebab_case(input: &str) -> String {
     } else {
         out.trim_matches('-').to_string()
     }
+}
+
+fn to_snake_case(input: &str) -> String {
+    let mut out = String::new();
+    let mut prev_is_sep = false;
+
+    for ch in input.chars() {
+        if ch.is_ascii_alphanumeric() {
+            if ch.is_ascii_uppercase() && !out.is_empty() && !prev_is_sep {
+                out.push('_');
+            }
+            out.push(ch.to_ascii_lowercase());
+            prev_is_sep = false;
+        } else if !out.is_empty() && !prev_is_sep {
+            out.push('_');
+            prev_is_sep = true;
+        }
+    }
+
+    out.trim_matches('_').to_string()
 }
 
 #[cfg(test)]

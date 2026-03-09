@@ -11,6 +11,7 @@
     "app.ir.json",
     "native-app/Cargo.toml",
     "native-app/src/main.rs",
+    "native-app/src/actions.rs",
     "native-app/src/app.rs",
     "native-app/src/model.rs",
     "native-app/src/style.rs",

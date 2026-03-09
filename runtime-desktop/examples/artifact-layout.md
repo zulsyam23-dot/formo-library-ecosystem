@@ -29,7 +29,7 @@ Contoh artifact hasil build target desktop (native Rust):
 
 Kontrak minimal:
 
-- runtime target: `rust-native` (tanpa webview).
+- runtime target: `rust-native` dengan scaffold `dioxus-desktop` (DOM + CSS mapping).
 - style parity core (canonical-first via `effective_style_decls(...)`):
   - visual: `color`, `background`, `border`, `border-radius`, `box-shadow`, `opacity`
   - spacing/sizing: `padding`, `margin`, `gap`, `width/height`, `min/max-width`, `min/max-height`
